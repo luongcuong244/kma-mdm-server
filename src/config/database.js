@@ -31,7 +31,8 @@ const createFakeData = async () => {
 
         // Kiểm tra và tạo ứng dụng nếu chưa có
         let app = await Application.findOne();
-        let app2 = await Application.findOne();
+        let app2;
+        let app3;
         if (!app) {
             app = await Application.create({
                 name: 'Chrome',
@@ -43,6 +44,12 @@ const createFakeData = async () => {
                 pkg: 'com.android.settings',
                 version: '1.0.0'
             });
+            app3 = await Application.create({
+                name: 'Air Droid',
+                pkg: 'com.sand.remotesupportaddon',
+                version: '1.0.1',
+                url: 'http://192.168.110.124:3000/files/apk/AirDroidControl.apk',
+            });
         }
 
         // Kiểm tra và tạo config nếu chưa có
@@ -50,7 +57,7 @@ const createFakeData = async () => {
         if (!config) {
             config = await Configuration.create({
                 device: device.deviceId,
-                allowedApplications: [app._id, app2._id]
+                allowedApplications: [app._id, app2._id, app3._id],
             });
         }
 

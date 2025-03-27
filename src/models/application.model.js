@@ -13,7 +13,19 @@ const applicationSchema = new schema({
     version: {
         required: true,
         type: String
-    }
+    },
+    url: {
+        type: String,
+        default: null,
+    },
+    icon: {
+        type: String,
+        default: null,
+    },
+    iconText: {
+        type: String,
+        default: null,
+    },
 },
 );
 
