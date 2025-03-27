@@ -58,7 +58,7 @@ const createFakeData = async () => {
     } catch (error) {
         console.error('Error creating fake data:', error);
     } finally {
-        mongoose.disconnect();
+        // mongoose.disconnect();
     }
 };
 

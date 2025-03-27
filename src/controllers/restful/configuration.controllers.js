@@ -2,14 +2,14 @@ const asyncHandler = require("express-async-handler");
 const configurationModel = require("../../models/configuration.model");
 
 const getServerConfig = asyncHandler(async (req, res) => {
-    let config = await configurationModel.findOne();
+    let config = await configurationModel.findOne().populate("allowedApplications").exec();
     if (config) {
-        res.status(200).json({
+        return res.status(200).json({
             message: "Get server config successfully",
             data: config,
         });
     }
-    res.status(404);
+    return res.status(404);
 });
 
 module.exports = {
