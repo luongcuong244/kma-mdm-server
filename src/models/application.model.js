@@ -10,9 +10,13 @@ const applicationSchema = new schema({
         requiered: true,
         type: String
     },
-    version: {
+    versionName: {
         required: true,
         type: String
+    },
+    versionCode: {
+        required: true,
+        type: Number,
     },
     url: {
         type: String,

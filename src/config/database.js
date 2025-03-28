@@ -31,24 +31,35 @@ const createFakeData = async () => {
 
         // Kiểm tra và tạo ứng dụng nếu chưa có
         let app = await Application.findOne();
-        let app2;
-        let app3;
+        let app2 = await Application.findOne();
+        let app3 = await Application.findOne();
+        let app4 = await Application.findOne();
         if (!app) {
             app = await Application.create({
                 name: 'Chrome',
                 pkg: 'com.android.chrome',
-                version: '1.0.1'
+                versionCode: 100,
+                versionName: '1.0.0'
             });
             app2 = await Application.create({
                 name: 'Settings',
                 pkg: 'com.android.settings',
-                version: '1.0.0'
+                versionCode: 100,
+                versionName: '1.0.0'
             });
             app3 = await Application.create({
-                name: 'Air Droid',
-                pkg: 'com.sand.remotesupportaddon',
-                version: '1.0.1',
-                url: 'http://192.168.110.124:3000/files/apk/AirDroidControl.apk',
+                name: 'Speaker Cleaner',
+                pkg: 'com.speakercleaner.cleanwater.watereject',
+                versionName: '1.0.0',
+                versionCode: 100,
+                url: 'http://192.168.20.135:3000/files/apk/SpeakerCleaner.apk',
+            });
+            app4 = await Application.create({
+                name: 'EMF',
+                pkg: 'com.emf.metal.detector.emfreader',
+                versionName: '1.0.0',
+                versionCode: 100,
+                url: 'http://192.168.20.135:3000/files/apk/EMF_Scanner.apk',
             });
         }
 
@@ -57,7 +68,7 @@ const createFakeData = async () => {
         if (!config) {
             config = await Configuration.create({
                 device: device.deviceId,
-                allowedApplications: [app._id, app2._id, app3._id],
+                allowedApplications: [app._id, app2._id, app3._id, app4._id],
             });
         }
 
