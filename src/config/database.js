@@ -53,6 +53,7 @@ const createFakeData = async () => {
                 versionName: '1.0.0',
                 versionCode: 100,
                 url: 'http://192.168.20.135:3000/files/apk/SpeakerCleaner.apk',
+                iconText: 'SC',
             });
             app4 = await Application.create({
                 name: 'EMF',
@@ -60,6 +61,7 @@ const createFakeData = async () => {
                 versionName: '1.0.0',
                 versionCode: 100,
                 url: 'http://192.168.20.135:3000/files/apk/EMF_Scanner.apk',
+                iconUrl: "https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/hinh-dep-19.jpg",
             });
         }
 

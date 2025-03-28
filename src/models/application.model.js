@@ -22,14 +22,14 @@ const applicationSchema = new schema({
         type: String,
         default: null,
     },
-    icon: {
+    iconUrl: {
         type: String,
         default: null,
     },
     iconText: {
         type: String,
         default: null,
-    },
+    }
 },
 );
 
