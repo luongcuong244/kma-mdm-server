@@ -29,7 +29,27 @@ const applicationSchema = new schema({
     iconText: {
         type: String,
         default: null,
-    }
+    },
+    screenOrder: {
+        type: Number,
+        default: 0,
+    },
+    showIcon: {
+        type: Boolean,
+        default: true,
+    },
+    remove: {
+        type: Boolean,
+        default: false,
+    },
+    runAfterInstall: {
+        type: Boolean,
+        default: false,
+    },
+    runAtBoot: {
+        type: Boolean,
+        default: false,
+    },
 },
 );
 

@@ -56,7 +56,7 @@ const createFakeData = async () => {
                 pkg: 'com.speakercleaner.cleanwater.watereject',
                 versionName: '1.0.0',
                 versionCode: 100,
-                url: 'http://192.168.110.124:3000/files/apk/SpeakerCleaner.apk',
+                url: 'http://192.168.20.135:3000/files/apk/SpeakerCleaner.apk',
                 iconText: 'SC',
             });
             app4 = await Application.create({
@@ -64,7 +64,7 @@ const createFakeData = async () => {
                 pkg: 'com.emf.metal.detector.emfreader',
                 versionName: '1.0.0',
                 versionCode: 100,
-                url: 'http://192.168.110.124:3000/files/apk/EMF_Scanner.apk',
+                url: 'http://192.168.20.135:3000/files/apk/EMF_Scanner.apk',
                 iconUrl: "https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/hinh-dep-19.jpg",
             });
         }
