@@ -44,6 +44,10 @@ const configurationSchema = new schema({
         enum: [0, 1, 2], // 1: portrait, 2: landscape
         default: 0,
     },
+    runDefaultLauncher: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+    },
 },
 );
 
