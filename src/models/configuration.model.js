@@ -48,6 +48,10 @@ const configurationSchema = new schema({
         type: mongoose.Schema.Types.Boolean,
         default: false,
     },
+    restrictions: {
+        type: mongoose.Schema.Types.String,
+        default: null,
+    }
 },
 );
 
