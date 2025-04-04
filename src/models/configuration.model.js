@@ -51,7 +51,18 @@ const configurationSchema = new schema({
     restrictions: {
         type: mongoose.Schema.Types.String,
         default: null,
-    }
+    },
+
+    // kiosk mode
+    kioskMode: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+    },
+    mainApp: {
+        type: mongoose.Schema.Types.String,
+        ref: applicationModel,
+        default: null,
+    },
 },
 );
 
