@@ -58,10 +58,9 @@ const configurationSchema = new schema({
         type: mongoose.Schema.Types.Boolean,
         default: false,
     },
-    mainApp: {
-        type: mongoose.Schema.Types.String,
-        ref: applicationModel,
-        default: null,
+    kioskApps: {
+        type: mongoose.Schema.Types.Array,
+        default: [],
     },
 },
 );
