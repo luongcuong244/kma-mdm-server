@@ -38,6 +38,7 @@ const createFakeData = async () => {
         let app2 = await Application.findOne();
         let app3 = await Application.findOne();
         let app4 = await Application.findOne();
+        let app5 = await Application.findOne();
         if (!app) {
             app = await Application.create({
                 name: 'Chrome',
@@ -56,7 +57,7 @@ const createFakeData = async () => {
                 pkg: 'com.speakercleaner.cleanwater.watereject',
                 versionName: '1.0.0',
                 versionCode: 100,
-                url: 'http://192.168.20.135:3000/files/apk/SpeakerCleaner.apk',
+                url: 'http://192.168.110.124:3000/files/apk/SpeakerCleaner.apk',
                 iconText: 'SC',
             });
             app4 = await Application.create({
@@ -64,8 +65,15 @@ const createFakeData = async () => {
                 pkg: 'com.emf.metal.detector.emfreader',
                 versionName: '1.0.0',
                 versionCode: 100,
-                url: 'http://192.168.20.135:3000/files/apk/EMF_Scanner.apk',
+                url: 'http://192.168.110.124:3000/files/apk/EMF_Scanner.apk',
                 iconUrl: "https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/hinh-dep-19.jpg",
+            });
+            app5 = await Application.create({
+                name: 'KMA Kiosk',
+                pkg: 'com.example.kmakioskapp',
+                versionName: '1.0.0',
+                versionCode: 100,
+                url: 'http://192.168.110.124:3000/files/apk/KMA_Kiosk.apk',
             });
         }
 
@@ -74,7 +82,7 @@ const createFakeData = async () => {
         if (!config) {
             config = await Configuration.create({
                 device: device.deviceId,
-                allowedApplications: [app._id, app2._id, app3._id, app4._id],
+                allowedApplications: [app._id, app2._id, app3._id, app4._id, app5._id],
                 backgroundColor: '#000000',
             });
         }
