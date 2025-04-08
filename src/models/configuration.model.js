@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const applicationModel = require('./application.model');
 const deviceInfoModel = require('./deviceInfo.model');
+const applicationSettingModel = require('./application_setting.model');
 const { text } = require('express');
 const schema = mongoose.Schema;
 
@@ -20,6 +21,11 @@ const configurationSchema = new schema({
     allowedApplications: {
         type: mongoose.Schema.Types.Array,
         ref: applicationModel,
+        default: [],
+    },
+    applicationSettings: {
+        type: mongoose.Schema.Types.Array,
+        ref: applicationSettingModel,
         default: [],
     },
     backgroundColor: {

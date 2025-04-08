@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const DeviceInfo = require('../models/deviceInfo.model');
 const Application = require('../models/application.model');
 const Configuration = require('../models/configuration.model');
+const ApplicationSetting = require('../models/application_setting.model');
 require("dotenv").config()
 
 const connectDatabase = async () => {
@@ -23,6 +24,7 @@ const createFakeData = async () => {
     await DeviceInfo.deleteMany();
     await Application.deleteMany();
     await Configuration.deleteMany();
+    await ApplicationSetting.deleteMany();
     try {
         // Kiểm tra và tạo device nếu chưa có
         let device = await DeviceInfo.findOne();
@@ -57,7 +59,7 @@ const createFakeData = async () => {
                 pkg: 'com.speakercleaner.cleanwater.watereject',
                 versionName: '1.0.0',
                 versionCode: 100,
-                url: 'http://192.168.110.124:3000/files/apk/SpeakerCleaner.apk',
+                url: 'http://192.168.20.135:3000/files/apk/SpeakerCleaner.apk',
                 iconText: 'SC',
             });
             app4 = await Application.create({
@@ -65,7 +67,7 @@ const createFakeData = async () => {
                 pkg: 'com.emf.metal.detector.emfreader',
                 versionName: '1.0.0',
                 versionCode: 100,
-                url: 'http://192.168.110.124:3000/files/apk/EMF_Scanner.apk',
+                url: 'http://192.168.20.135:3000/files/apk/EMF_Scanner.apk',
                 iconUrl: "https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/hinh-dep-19.jpg",
             });
             app5 = await Application.create({
@@ -73,7 +75,17 @@ const createFakeData = async () => {
                 pkg: 'com.example.kmakioskapp',
                 versionName: '1.0.0',
                 versionCode: 100,
-                url: 'http://192.168.110.124:3000/files/apk/KMA_Kiosk.apk',
+                url: 'http://192.168.20.135:3000/files/apk/KMA_Kiosk.apk',
+            });
+        }
+
+        // create application setting
+        let applicationSettings = await ApplicationSetting.findOne();
+        if (!applicationSettings) {
+            applicationSettings = await ApplicationSetting.create({
+                application: app,
+                attribute: 'url',
+                value: 'https://pub.dev/packages/auto_size_text/install',
             });
         }
 
@@ -83,6 +95,7 @@ const createFakeData = async () => {
             config = await Configuration.create({
                 device: device.deviceId,
                 allowedApplications: [app._id, app2._id, app3._id, app4._id, app5._id],
+                applicationSettings: [applicationSettings._id],
                 backgroundColor: '#000000',
             });
         }
