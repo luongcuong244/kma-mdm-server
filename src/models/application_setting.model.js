@@ -5,7 +5,7 @@ const schema = mongoose.Schema;
 const applicationSettingSchema = new schema({
     application: {
         required: true,
-        type: mongoose.Schema.Types.String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: application,
     },
     attribute: {
