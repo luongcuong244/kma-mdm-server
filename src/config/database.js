@@ -3,6 +3,7 @@ const DeviceInfo = require('../models/deviceInfo.model');
 const Application = require('../models/application.model');
 const Configuration = require('../models/configuration.model');
 const ApplicationSetting = require('../models/application_setting.model');
+const User = require('../models/user.model');
 require("dotenv").config()
 
 const connectDatabase = async () => {
@@ -10,13 +11,33 @@ const connectDatabase = async () => {
         const databaseConfig = "mongodb://127.0.0.1/KmaMdm";
         const connect = await mongoose.connect(databaseConfig);
         console.log(`da ket noi mongodb: ${connect.connection.host}`);
-
+        createAdminUser();
         // Tạo dữ liệu giả
         createFakeData();
     } catch (error) {
         console.log('chua the ket noi toi mongodb');
         console.log(error);
     }
+}
+
+const createAdminUser = async () => {
+    var adminUserName = process.env.ADMIN_USER_NAME;
+    var adminPassword = process.env.ADMIN_USER_PASSWORD;
+    // Kiểm tra xem người dùng đã tồn tại trong cơ sở dữ liệu hay chưa
+    const existingUser = await User.findOne({ userName: adminUserName });
+    if (existingUser) {
+        console.log('Người dùng đã tồn tại trong cơ sở dữ liệu.');
+        return;
+    }
+    // Nếu người dùng chưa tồn tại, tạo một người dùng mới
+    const newUser = new User({
+        userName: adminUserName,
+        password: adminPassword,
+        role: 'admin',
+    });
+    // Lưu người dùng vào cơ sở dữ liệu
+    await newUser.save();
+    console.log('Người dùng admin đã được tạo thành công.');
 }
 
 const createFakeData = async () => {
