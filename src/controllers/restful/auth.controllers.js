@@ -10,7 +10,7 @@ exports.signIn = async (req, res) => {
     if (!reqUserName || !reqPassword) {
         console.log("Please fill in all fields!");
         return res.status(400).send({
-            message: "Please fill in all fields!",
+            message: "Vui lòng điền đầy đủ thông tin!",
         });
     }
     // Check if user exists
@@ -18,22 +18,22 @@ exports.signIn = async (req, res) => {
     if (!user) {
         console.log("User not found!");
         return res.status(400).send({
-            message: "User not found!",
+            message: "Nguời dùng không tồn tại!",
         });
     }
     // Check if password is correct
-    const isMatch = user.isCorrectPassword(reqPassword);
+    const isMatch = await user.isCorrectPassword(reqPassword);
     if (!isMatch) {
         console.log("Incorrect password!");
         return res.status(400).send({
-            message: "Incorrect password!",
+            message: "Mật khẩu không chính xác!",
         });
     }
     // Check if user is blocked
     if (user.isBlocked) {
         console.log("User is blocked!");
         return res.status(400).send({
-            message: "User is blocked!",
+            message: "Người dùng đã bị khóa!",
         });
     }
     // Create token
@@ -61,3 +61,20 @@ exports.signIn = async (req, res) => {
         userInfo: userData,
     });
 };
+
+exports.signOut = async (req, res) => {
+    const { _id } = req.user;
+    // Xóa refresh token trong cơ sở dữ liệu
+    await User.findByIdAndUpdate(
+        _id,
+        { refreshToken: null },
+        { new: true }
+    );
+    // Xóa cookie
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    // Trả về thông báo thành công
+    return res.status(200).json({
+        message: "Đăng xuất thành công!",
+    });
+}
