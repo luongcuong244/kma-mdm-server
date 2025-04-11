@@ -10,17 +10,23 @@ const applicationSchema = new schema({
         requiered: true,
         type: String
     },
-    versionName: {
-        required: true,
-        type: String
+    isSystemApp: {
+        type: Boolean,
+        default: false,
     },
-    versionCode: {
-        required: true,
-        type: Number,
+    versions: {
+        type: [
+            {
+                versionName: { type: String, required: true },
+                versionCode: { type: Number, required: true },
+                url: { type: String, default: null },
+            }
+        ],
+        default: [],
     },
-    url: {
-        type: String,
-        default: null,
+    showIcon: {
+        type: Boolean,
+        default: false,
     },
     iconUrl: {
         type: String,
@@ -29,26 +35,6 @@ const applicationSchema = new schema({
     iconText: {
         type: String,
         default: null,
-    },
-    screenOrder: {
-        type: Number,
-        default: 0,
-    },
-    showIcon: {
-        type: Boolean,
-        default: true,
-    },
-    remove: {
-        type: Boolean,
-        default: false,
-    },
-    runAfterInstall: {
-        type: Boolean,
-        default: false,
-    },
-    runAtBoot: {
-        type: Boolean,
-        default: false,
     },
 },
 );

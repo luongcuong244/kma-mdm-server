@@ -67,44 +67,70 @@ const createFakeData = async () => {
             app = await Application.create({
                 name: 'Chrome',
                 pkg: 'com.android.chrome',
-                versionCode: 100,
-                versionName: '1.0.0'
+                versions: [
+                    {
+                        versionCode: 100,
+                        versionName: '1.0.0',
+                    }
+                ],
+                isSystemApp: true,
             });
             app2 = await Application.create({
                 name: 'Settings',
                 pkg: 'com.android.settings',
-                versionCode: 100,
-                versionName: '1.0.0'
+                versions: [
+                    {
+                        versionCode: 100,
+                        versionName: '1.0.0',
+                    }
+                ],
+                isSystemApp: true,
             });
             app3 = await Application.create({
                 name: 'Speaker Cleaner',
                 pkg: 'com.speakercleaner.cleanwater.watereject',
-                versionName: '1.0.0',
-                versionCode: 100,
-                url: 'http://192.168.110.124:3000/files/apk/SpeakerCleaner.apk',
+                versions: [
+                    {
+                        versionCode: 100,
+                        versionName: '1.0.0',
+                        url: 'http://192.168.110.124:3000/files/apk/SpeakerCleaner.apk',
+                    }
+                ],
                 iconText: 'SC',
             });
             app4 = await Application.create({
                 name: 'EMF',
                 pkg: 'com.emf.metal.detector.emfreader',
-                versionName: '1.0.0',
-                versionCode: 100,
-                url: 'http://192.168.110.124:3000/files/apk/EMF_Scanner.apk',
+                versions: [
+                    {
+                        versionCode: 100,
+                        versionName: '1.0.0',
+                        url: 'http://192.168.110.124:3000/files/apk/EMF_Scanner.apk',
+                    }
+                ],
                 iconUrl: "https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/hinh-dep-19.jpg",
             });
             app5 = await Application.create({
                 name: 'KMA Kiosk',
                 pkg: 'com.example.kmakioskapp',
-                versionName: '1.0.0',
-                versionCode: 100,
-                url: 'http://192.168.110.124:3000/files/apk/KMA_Kiosk.apk',
+                versions: [
+                    {
+                        versionCode: 100,
+                        versionName: '1.0.0',
+                        url: 'http://192.168.110.124:3000/files/apk/KMA_Kiosk.apk',
+                    }
+                ],
             });
             app6 = await Application.create({
                 name: 'KMA Kiosk Web',
                 pkg: 'com.example.kmaweb',
-                versionName: '1.0.0',
-                versionCode: 100,
-                url: 'http://192.168.110.124:3000/files/apk/apk/KMA_Kiosk_Web_v1(1.0).apk',
+                versions: [
+                    {
+                        versionCode: 100,
+                        versionName: '1.0.0',
+                        url: 'http://192.168.110.124:3000/files/apk/apk/KMA_Kiosk_Web_v1(1.0).apk',
+                    }
+                ],
             });
         }
 
@@ -122,6 +148,8 @@ const createFakeData = async () => {
         let config = await Configuration.findOne();
         if (!config) {
             config = await Configuration.create({
+                name: 'KMA MDM',
+                description: 'KMA MDM',
                 device: device.deviceId,
                 allowedApplications: [app._id, app2._id, app3._id, app4._id, app5._id, app6._id],
                 applicationSettings: [applicationSettings._id],

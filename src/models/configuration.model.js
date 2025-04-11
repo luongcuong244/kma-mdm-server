@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const applicationModel = require('./application.model');
 const deviceInfoModel = require('./deviceInfo.model');
 const applicationSettingModel = require('./application_setting.model');
-const { text } = require('express');
 const schema = mongoose.Schema;
 
 const ICON_SIZES = {
@@ -12,6 +11,15 @@ const ICON_SIZES = {
 };
 
 const configurationSchema = new schema({
+    name: {
+        required: true,
+        unique: true,
+        type: mongoose.Schema.Types.String,
+    },
+    description: {
+        type: mongoose.Schema.Types.String,
+        default: null,
+    },
     device: {
         required: true,
         unique: true,
