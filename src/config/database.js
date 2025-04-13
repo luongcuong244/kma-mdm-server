@@ -108,7 +108,6 @@ const createFakeData = async () => {
                         url: 'http://192.168.110.124:3000/files/apk/EMF_Scanner.apk',
                     }
                 ],
-                iconUrl: "https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/hinh-dep-19.jpg",
             });
             app5 = await Application.create({
                 name: 'KMA Kiosk',

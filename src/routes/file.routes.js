@@ -23,6 +23,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/upload-apk', [verifyAccessToken, upload.single('apkFile')], controller.uploadApk);
+router.post('/upload-file', [verifyAccessToken, upload.single('file')], controller.uploadFile);
 router.post('/cancel-upload', [verifyAccessToken], controller.cancelUpload);
 
 module.exports = router;

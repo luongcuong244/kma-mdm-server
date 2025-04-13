@@ -1,3 +1,4 @@
+const Application = require("../../models/application.model");
 var ApkReader = require('node-apk-parser')
 const fs = require("fs");
 
@@ -10,23 +11,45 @@ exports.uploadApk = async (req, res) => {
         const reader = await ApkReader.readFile(apkFilePath);
         const manifest = reader.readManifestSync();
 
+        const pkg = manifest.package;
+        const versionName = manifest.versionName;
+        const versionCode = manifest.versionCode;
+
+        const application = await Application.findOne({ pkg: pkg });
+
+        if (application) {
+            return res.status(400).json({
+                status: "ERROR",
+                message: "Ứng dụng đã tồn tại",
+            });
+        }
+
         return res.status(200).json({
             data: {
                 serverPath: apkFilePath,
                 fileDetails: {
-                    pkg: manifest.package,
-                    version: manifest.versionName,
-                    versionCode: manifest.versionCode,
-                    name: manifest.application.label || "Unknown App"
+                    pkg: pkg,
+                    version: versionName,
+                    versionCode: versionCode,
+                    name: null,
                 },
-                application: null,
-                complete: null,
-                exists: null
             }
         });
     } catch (err) {
         console.error("APK Parse Error:", err);
         return res.status(500).json({ status: "ERROR", message: "Failed to parse APK" });
+    }
+};
+
+exports.uploadFile = async (req, res) => {
+    try {
+        const filePath = req.file.path;
+        console.log("File Path:", filePath);
+        return res.status(200).json({
+            serverPath: filePath,
+        });
+    } catch (err) {
+        return res.status(500).json({ status: "ERROR", message: "Failed to upload file" });
     }
 };
 

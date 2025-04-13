@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const schema = mongoose.Schema;
+const AppIcon = require('./app_icon.model');
 
 const applicationSchema = new schema({
     name: {
@@ -28,8 +29,9 @@ const applicationSchema = new schema({
         type: Boolean,
         default: false,
     },
-    iconUrl: {
-        type: String,
+    icon: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: AppIcon,
         default: null,
     },
     iconText: {
