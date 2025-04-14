@@ -218,3 +218,146 @@ exports.editApplication = async (req, res) => {
         return res.status(500).json({ status: "ERROR", message: "Failed to add application" });
     }
 };
+
+exports.getApplicationByPackageName = async (req, res) => {
+    try {
+        const { packageName } = req.query;
+
+        if (!packageName) {
+            return res.status(400).json({
+                message: "Thông tin không hợp lệ",
+            });
+        }
+
+        // check packageName
+        const application = await Application.findOne({ pkg: packageName });
+        if (application) {
+            return res.status(200).json({
+                message: "Lấy ứng dụng thành công",
+                data: application,
+            });
+        } else {
+            return res.status(400).json({
+                message: "Ứng dụng không tồn tại",
+            });
+        }
+    } catch (err) {
+        console.error("Lỗi khi lấy ứng dụng:", err);
+        return res.status(500).json({ status: "ERROR", message: "Failed to add application" });
+    }
+}
+
+exports.addApkVersion = async (req, res) => {
+    try {
+        const { 
+            apkServerPath, 
+            packageName, 
+            versionName, 
+            versionCode 
+        } = req.body;
+
+        if (!apkServerPath || !packageName || !versionName || !versionCode) {
+            return res.status(400).json({
+                message: "Thông tin không hợp lệ",
+            });
+        }
+
+        // check packageName
+        const application = await Application.findOne({ pkg: packageName });
+        if (!application) {
+            return res.status(400).json({
+                message: "Ứng dụng không tồn tại",
+            });
+        }
+
+        // get last version
+        const lastVersion = application.versions.reduce((prev, current) => {
+            return (prev.versionCode > current.versionCode) ? prev : current;
+        })
+
+        if (lastVersion.versionCode >= versionCode) {
+            return res.status(400).json({
+                message: "Yêu cầu phiên bản lớn hơn phiên bản hiện tại (" + lastVersion.versionCode + ")",
+            });
+        }
+
+        if (apkServerPath && fs.existsSync(apkServerPath)) {
+            const fileName = path.basename(apkServerPath).replace(".temp", ".apk");
+            const uploadDir = path.join(__dirname, "..", "..", "public", "files", "apk");
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            const newPath = path.join(uploadDir, fileName);
+            fs.renameSync(apkServerPath, newPath);
+            console.log("APK saved to:", newPath);
+
+            const url = `/files/apk/${fileName}`;
+            
+            const newVersion = {
+                versionName,
+                versionCode,
+                url,
+            }
+            application.versions.push(newVersion);
+            await application.save();
+
+            return res.status(200).json({
+                message: "Thêm phiên bản APK thành công",
+                data: newVersion,
+            });
+        } else {
+            return res.status(400).json({
+                message: "Đường dẫn APK không hợp lệ. Vui lòng tải lên lại.",
+            });
+        }
+    } catch (err) {
+        console.error("Lỗi khi thêm phiên bản APK:", err);
+        return res.status(500).json({ status: "ERROR", message: "Failed to add application" });
+    }
+}
+
+exports.deleteApkVersion = async (req, res) => {
+    try {
+        const { 
+            packageName, 
+            versionCode 
+        } = req.body;
+
+        if (!packageName || !versionCode) {
+            return res.status(400).json({
+                message: "Thông tin không hợp lệ",
+            });
+        }
+
+        // check packageName
+        const application = await Application.findOne({ pkg: packageName });
+        if (!application) {
+            return res.status(400).json({
+                message: "Ứng dụng không tồn tại",
+            });
+        }
+
+        const versions = application.versions;
+
+        // get specific version
+        const versionWillBeDelete = versions.find(version => version.versionCode === versionCode);
+
+        if (!versionWillBeDelete) {
+            return res.status(400).json({
+                message: "Phiên bản không tồn tại",
+            });
+        }
+
+        const newVersions = application.versions.filter(version => version.versionCode !== versionCode);
+        application.versions = newVersions;
+        await application.save();
+
+        return res.status(200).json({
+            message: "Xóa phiên bản APK thành công",
+            data: newVersions,
+        });
+    } catch (err) {
+        console.error("Lỗi khi xóa phiên bản APK:", err);
+        return res.status(500).json({ status: "ERROR", message: "Failed to add application" });
+    }
+}

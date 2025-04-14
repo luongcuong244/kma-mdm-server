@@ -62,7 +62,6 @@ const createFakeData = async () => {
         let app3 = await Application.findOne();
         let app4 = await Application.findOne();
         let app5 = await Application.findOne();
-        let app6 = await Application.findOne();
         if (!app) {
             app = await Application.create({
                 name: 'Chrome',
@@ -120,28 +119,17 @@ const createFakeData = async () => {
                     }
                 ],
             });
-            app6 = await Application.create({
-                name: 'KMA Kiosk Web',
-                pkg: 'com.example.kmaweb',
-                versions: [
-                    {
-                        versionCode: 100,
-                        versionName: '1.0.0',
-                        url: 'http://192.168.110.124:3000/files/apk/apk/KMA_Kiosk_Web_v1(1.0).apk',
-                    }
-                ],
-            });
         }
 
-        // create application setting
-        let applicationSettings = await ApplicationSetting.findOne();
-        if (!applicationSettings) {
-            applicationSettings = await ApplicationSetting.create({
-                application: app6,
-                attribute: 'webview_url',
-                value: 'https://github.com/luongcuong244/KMA-Kiosk-Web',
-            });
-        }
+        // // create application setting
+        // let applicationSettings = await ApplicationSetting.findOne();
+        // if (!applicationSettings) {
+        //     applicationSettings = await ApplicationSetting.create({
+        //         application: app6,
+        //         attribute: 'webview_url',
+        //         value: 'https://github.com/luongcuong244/KMA-Kiosk-Web',
+        //     });
+        // }
 
         // Kiểm tra và tạo config nếu chưa có
         let config = await Configuration.findOne();
@@ -150,8 +138,7 @@ const createFakeData = async () => {
                 name: 'KMA MDM',
                 description: 'KMA MDM',
                 device: device.deviceId,
-                allowedApplications: [app._id, app2._id, app3._id, app4._id, app5._id, app6._id],
-                applicationSettings: [applicationSettings._id],
+                allowedApplications: [app._id, app2._id, app3._id, app4._id, app5._id],
                 backgroundColor: '#000000',
             });
         }

@@ -17,12 +17,12 @@ exports.uploadApk = async (req, res) => {
 
         const application = await Application.findOne({ pkg: pkg });
 
-        if (application) {
-            return res.status(400).json({
-                status: "ERROR",
-                message: "Ứng dụng đã tồn tại",
-            });
-        }
+        // if (application) {
+        //     return res.status(400).json({
+        //         status: "ERROR",
+        //         message: "Ứng dụng đã tồn tại",
+        //     });
+        // }
 
         return res.status(200).json({
             data: {
