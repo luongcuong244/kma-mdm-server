@@ -177,3 +177,44 @@ exports.addApplication = async (req, res) => {
         return res.status(500).json({ status: "ERROR", message: "Failed to add application" });
     }
 };
+
+exports.editApplication = async (req, res) => {
+    try {
+        const {
+            id,
+            appName, 
+            packageName, 
+            showIcon, 
+            iconId,
+            iconName,
+        } = req.body;
+
+        if (!appName || !packageName) {
+            return res.status(400).json({
+                message: "Thông tin không hợp lệ",
+            });
+        }
+
+        // check packageName
+        const application = await Application.findOne({ _id: id });
+        if (application) {
+            application.name = appName;
+            application.pkg = packageName;
+            application.icon = iconId || null;
+            application.iconText = iconName || null;
+            application.showIcon = showIcon || false;
+            await application.save();
+            return res.status(200).json({
+                message: "Cập nhật ứng dụng thành công",
+                data: application,
+            });
+        } else {
+            return res.status(400).json({
+                message: "Ứng dụng không tồn tại",
+            });
+        }
+    } catch (err) {
+        console.error("Add application error:", err);
+        return res.status(500).json({ status: "ERROR", message: "Failed to add application" });
+    }
+};

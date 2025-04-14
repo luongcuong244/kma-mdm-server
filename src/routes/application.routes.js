@@ -8,5 +8,6 @@ router.get("/get-all", [verifyAccessToken], controller.getAll);
 router.get("/get-app-icon", [verifyAccessToken], controller.getAppIcon);
 router.post("/add-app-icon", [verifyAccessToken], controller.addAppIcon);
 router.post("/add-application", [verifyAccessToken], controller.addApplication);
+router.post("/edit-application", [verifyAccessToken], controller.editApplication);
 
 module.exports = router;
