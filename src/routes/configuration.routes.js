@@ -4,7 +4,11 @@ const { verifyAccessToken } = require("../middlewares/verifyToken");
 
 const controller = require("../controllers/restful/configuration.controllers");
 
-router.get("/get-all", [verifyAccessToken], controller.getAll);
+// app
 router.get("/get-server-config", controller.getServerConfig);
+
+// web
+router.get("/get-all", [verifyAccessToken], controller.getAll);
+router.get("/get-configuration", [verifyAccessToken], controller.getConfiguration);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const Configuration = require("../../models/configuration.model");
+const mongoose = require("mongoose");
 
 exports.getAll = async (req, res) => {
     try {
@@ -23,6 +24,29 @@ exports.getAll = async (req, res) => {
         console.error("Error fetching configurations:", err);
         return res.status(500).json({
             message: "Internal Server Error",
+        });
+    }
+};
+
+exports.getConfiguration = async (req, res) => {
+    try {
+        const id = req.query.id;
+
+        const configuration = await Configuration.findById(id)
+
+        if (!configuration) {
+            return res.status(404).json({
+                message: "Không tìm thấy cấu hình",
+            });
+        }
+
+        return res.status(200).json({
+            data: configuration,
+        });
+    } catch (err) {
+        console.error("Error fetching configuration:", err);
+        return res.status(500).json({
+            message: "Lỗi server",
         });
     }
 };
