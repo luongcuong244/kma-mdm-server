@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const applicationModel = require('./application.model');
 const deviceInfoModel = require('./deviceInfo.model');
 const applicationSettingModel = require('./application_setting.model');
+const applicationConfig = require('./application_config.model');
 const schema = mongoose.Schema;
 
 const ICON_SIZES = {
@@ -26,9 +27,9 @@ const configurationSchema = new schema({
         type: mongoose.Schema.Types.String,
         ref: deviceInfoModel,
     },
-    allowedApplications: {
+    applications: {
         type: mongoose.Schema.Types.Array,
-        ref: applicationModel,
+        ref: applicationConfig,
         default: [],
     },
     applicationSettings: {

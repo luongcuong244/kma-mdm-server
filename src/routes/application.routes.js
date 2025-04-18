@@ -12,5 +12,6 @@ router.post("/edit-application", [verifyAccessToken], controller.editApplication
 router.get("/get-application", [verifyAccessToken], controller.getApplicationByPackageName);
 router.post("/add-apk-version", [verifyAccessToken], controller.addApkVersion);
 router.post("/delete-apk-version", [verifyAccessToken], controller.deleteApkVersion);
+router.post("/get-available-application-for-config", [verifyAccessToken], controller.getAvailableApplicationForConfig);
 
 module.exports = router;

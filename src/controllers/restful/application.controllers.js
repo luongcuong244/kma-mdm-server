@@ -1,5 +1,6 @@
 const Application = require("../../models/application.model");
 const AppIcon = require("../../models/app_icon.model");
+const Configuration = require("../../models/configuration.model");
 const fs = require("fs");
 const path = require("path");
 
@@ -358,6 +359,33 @@ exports.deleteApkVersion = async (req, res) => {
         });
     } catch (err) {
         console.error("Lỗi khi xóa phiên bản APK:", err);
+        return res.status(500).json({ status: "ERROR", message: "Failed to add application" });
+    }
+}
+
+exports.getAvailableApplicationForConfig = async (req, res) => {
+    try {
+        const {
+            configId,
+        } = req.body;
+
+        console.log("Received data:", req.body);
+
+        const allApplications = await Application.find();
+        const config = await Configuration.findById(configId).populate("applications");
+        if (!config) {
+            return res.status(200).json({
+                data: allApplications,
+            });
+        } else {
+            const configApplications = config.applications.map(app => app.application._id.toString());
+            const availableApplications = allApplications.filter(app => !configApplications.includes(app._id.toString()));
+            return res.status(200).json({
+                data: availableApplications,
+            });
+        }
+    } catch (err) {
+        console.error("Lỗi khi lấy ứng dụng:", err);
         return res.status(500).json({ status: "ERROR", message: "Failed to add application" });
     }
 }
