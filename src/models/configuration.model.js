@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const applicationModel = require('./application.model');
 const deviceInfoModel = require('./deviceInfo.model');
 const applicationSettingModel = require('./application_setting.model');
 const applicationConfig = require('./application_config.model');
@@ -12,6 +11,7 @@ const ICON_SIZES = {
 };
 
 const configurationSchema = new schema({
+    // Common Settings
     name: {
         required: true,
         unique: true,
@@ -21,31 +21,72 @@ const configurationSchema = new schema({
         type: mongoose.Schema.Types.String,
         default: null,
     },
-    device: {
-        required: true,
-        unique: true,
+    adminPassword: {
         type: mongoose.Schema.Types.String,
-        ref: deviceInfoModel,
+        default: null,
     },
-    applications: {
-        type: mongoose.Schema.Types.Array,
-        ref: applicationConfig,
-        default: [],
+    gps: {
+        type: mongoose.Schema.Types.String,
+        enum: ['Any', 'Disabled', 'Enabled'],
+        default: 'Any',
     },
-    applicationSettings: {
-        type: mongoose.Schema.Types.Array,
-        ref: applicationSettingModel,
-        default: [],
+    bluetooth: {
+        type: mongoose.Schema.Types.String,
+        enum: ['Any', 'Disabled', 'Enabled'],
+        default: 'Any',
+    },
+    wifi: {
+        type: mongoose.Schema.Types.String,
+        enum: ['Any', 'Disabled', 'Enabled'],
+        default: 'Any',
+    },
+    mobileData: {
+        type: mongoose.Schema.Types.String,
+        enum: ['Any', 'Disabled', 'Enabled'],
+        default: 'Any',
+    },
+    blockUSBStorage: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+    },
+    manageScreenTimeout: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+    },
+    screenTimeout: {
+        type: mongoose.Schema.Types.Number,
+        default: 60,
+    },
+    lockVolume: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+    },
+    manageVolume: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+    },
+    volumeValue: {
+        type: mongoose.Schema.Types.Number,
+        default: 50,
+    },
+    disableScreenCapture: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+    },
+    // Design Settings
+    useDefaultDesign: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
     },
     backgroundColor: {
         type: mongoose.Schema.Types.String,
-        default: null,
-    },
-    backgroundImageUrl: {
-        type: mongoose.Schema.Types.String,
-        default: null,
+        default: "#FFFFFF",
     },
     textColor: {
+        type: mongoose.Schema.Types.String,
+        default: "#000000",
+    },
+    backgroundImageUrl: {
         type: mongoose.Schema.Types.String,
         default: null,
     },
@@ -59,23 +100,69 @@ const configurationSchema = new schema({
         enum: [0, 1, 2], // 1: portrait, 2: landscape
         default: 0,
     },
-    runDefaultLauncher: {
+    displayTimeAndBatteryState: {
         type: mongoose.Schema.Types.Boolean,
         default: false,
+    },
+    // Applications
+    applications: {
+        type: mongoose.Schema.Types.Array,
+        ref: applicationConfig,
+        default: [],
+    },
+    // Mdm Settings
+    kioskMode: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+    },
+    mdmApp: {
+        type: mongoose.Schema.Types.String,
+        default: null,
+    },
+    adminReceiverClass: {
+        type: mongoose.Schema.Types.String,
+        default: null,
+    },
+    kioskApps: {
+        type: mongoose.Schema.Types.Array,
+        default: [],
+    },
+    showKioskExitButton: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+    },
+    lockThePowerButton: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+    },
+    wifiSSID: {
+        type: mongoose.Schema.Types.String,
+        default: null,
+    },
+    wifiPassword: {
+        type: mongoose.Schema.Types.String,
+        default: null,
     },
     restrictions: {
         type: mongoose.Schema.Types.String,
         default: null,
     },
-
-    // kiosk mode
-    kioskMode: {
+    // Application Settings
+    applicationSettings: {
+        type: mongoose.Schema.Types.Array,
+        ref: applicationSettingModel,
+        default: [],
+    },
+    // Others
+    device: {
+        required: true,
+        unique: true,
+        type: mongoose.Schema.Types.String,
+        ref: deviceInfoModel,
+    },
+    runDefaultLauncher: {
         type: mongoose.Schema.Types.Boolean,
         default: false,
-    },
-    kioskApps: {
-        type: mongoose.Schema.Types.Array,
-        default: [],
     },
 },
 );

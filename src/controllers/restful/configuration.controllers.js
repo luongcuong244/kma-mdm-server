@@ -71,3 +71,15 @@ exports.getServerConfig = async (req, res) => {
     }
     return res.status(404);
 }
+
+exports.saveConfiguration = async (req, res) => {
+    try {
+        const { configuration } = req.body;
+        console.log("configuration", configuration);
+    } catch (err) {
+        console.error("Error saving configuration:", err);
+        return res.status(500).json({
+            message: "Lỗi server",
+        });
+    }
+}

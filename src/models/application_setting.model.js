@@ -20,6 +20,10 @@ const applicationSettingSchema = new schema({
         type: String,
         default: null,
     },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
 },
 );
 

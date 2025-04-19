@@ -10,5 +10,6 @@ router.get("/get-server-config", controller.getServerConfig);
 // web
 router.get("/get-all", [verifyAccessToken], controller.getAll);
 router.get("/get-configuration", [verifyAccessToken], controller.getConfiguration);
+router.post("/save-configuration", [verifyAccessToken], controller.saveConfiguration);
 
 module.exports = router;
