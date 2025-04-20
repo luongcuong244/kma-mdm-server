@@ -75,6 +75,30 @@ exports.getServerConfig = async (req, res) => {
 exports.saveConfiguration = async (req, res) => {
     try {
         const { configuration } = req.body;
+        const { _id } = configuration;
+        // Kiểm tra xem _id có tồn tại không
+        if (_id) {
+            // Nếu có, cập nhật cấu hình
+            const updatedConfiguration = await Configuration.findByIdAndUpdate(
+                _id,
+                configuration,
+                { new: true }
+            );
+            if (!updatedConfiguration) {
+                return res.status(404).json({
+                    message: "Không tìm thấy cấu hình",
+                });
+            }
+        } else {
+            // Nếu không có, tạo mới cấu hình
+            const newConfiguration = new Configuration(configuration);
+            await newConfiguration.save();
+        }
+        // Trả về cấu hình đã lưu
+        return res.status(200).json({
+            message: "Lưu cấu hình thành công",
+            data: configuration,
+        });
         console.log("configuration", configuration);
     } catch (err) {
         console.error("Error saving configuration:", err);

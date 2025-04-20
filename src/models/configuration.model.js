@@ -23,7 +23,7 @@ const configurationSchema = new schema({
     },
     adminPassword: {
         type: mongoose.Schema.Types.String,
-        default: null,
+        required: true,
     },
     gps: {
         type: mongoose.Schema.Types.String,
@@ -107,7 +107,7 @@ const configurationSchema = new schema({
     // Applications
     applications: {
         type: mongoose.Schema.Types.Array,
-        ref: applicationConfig,
+        // ref: applicationConfig,
         default: [],
     },
     // Mdm Settings
@@ -117,11 +117,11 @@ const configurationSchema = new schema({
     },
     mdmApp: {
         type: mongoose.Schema.Types.String,
-        default: null,
+        required: true,
     },
     adminReceiverClass: {
         type: mongoose.Schema.Types.String,
-        default: null,
+        required: true,
     },
     kioskApps: {
         type: mongoose.Schema.Types.Array,
@@ -154,12 +154,12 @@ const configurationSchema = new schema({
         default: [],
     },
     // Others
-    device: {
-        required: true,
-        unique: true,
-        type: mongoose.Schema.Types.String,
-        ref: deviceInfoModel,
-    },
+    // device: {
+    //     required: true,
+    //     unique: true,
+    //     type: mongoose.Schema.Types.String,
+    //     ref: deviceInfoModel,
+    // },
     runDefaultLauncher: {
         type: mongoose.Schema.Types.Boolean,
         default: false,

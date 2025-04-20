@@ -13,7 +13,7 @@ const connectDatabase = async () => {
         console.log(`da ket noi mongodb: ${connect.connection.host}`);
         createAdminUser();
         // Tạo dữ liệu giả
-        createFakeData();
+        // createFakeData();
     } catch (error) {
         console.log('chua the ket noi toi mongodb');
         console.log(error);
@@ -44,7 +44,7 @@ const createFakeData = async () => {
     // remove all data
     await DeviceInfo.deleteMany();
     await Application.deleteMany();
-    await Configuration.deleteMany();
+    // await Configuration.deleteMany();
     await ApplicationSetting.deleteMany();
     try {
         // Kiểm tra và tạo device nếu chưa có
@@ -132,16 +132,16 @@ const createFakeData = async () => {
         // }
 
         // Kiểm tra và tạo config nếu chưa có
-        let config = await Configuration.findOne();
-        if (!config) {
-            config = await Configuration.create({
-                name: 'KMA MDM',
-                description: 'KMA MDM',
-                device: device.deviceId,
-                allowedApplications: [app._id, app2._id, app3._id, app4._id, app5._id],
-                backgroundColor: '#000000',
-            });
-        }
+        // let config = await Configuration.findOne();
+        // if (!config) {
+        //     config = await Configuration.create({
+        //         name: 'KMA MDM',
+        //         description: 'KMA MDM',
+        //         device: device.deviceId,
+        //         allowedApplications: [app._id, app2._id, app3._id, app4._id, app5._id],
+        //         backgroundColor: '#000000',
+        //     });
+        // }
 
         console.log('Fake data created successfully!');
     } catch (error) {

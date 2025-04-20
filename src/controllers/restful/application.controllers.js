@@ -372,7 +372,7 @@ exports.getAvailableApplicationForConfig = async (req, res) => {
         console.log("Received data:", req.body);
 
         const allApplications = await Application.find();
-        const config = await Configuration.findById(configId).populate("applications");
+        const config = await Configuration.findById(configId);
         if (!config) {
             return res.status(200).json({
                 data: allApplications,
@@ -380,6 +380,7 @@ exports.getAvailableApplicationForConfig = async (req, res) => {
         } else {
             const configApplications = config.applications.map(app => app.application._id.toString());
             const availableApplications = allApplications.filter(app => !configApplications.includes(app._id.toString()));
+            console.log("Available applications:", availableApplications);
             return res.status(200).json({
                 data: availableApplications,
             });
