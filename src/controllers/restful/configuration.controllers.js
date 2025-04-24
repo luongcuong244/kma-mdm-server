@@ -1,5 +1,6 @@
 const Configuration = require("../../models/configuration.model");
 const mongoose = require("mongoose");
+const { populate } = require("../../models/deviceInfo.model");
 
 exports.getAll = async (req, res) => {
     try {
@@ -53,12 +54,14 @@ exports.getConfiguration = async (req, res) => {
 
 exports.getServerConfig = async (req, res) => {
     let config = await Configuration.findOne()
-        .populate("allowedApplications")
         .populate({
-            path: "applicationSettings",
+            path: "applications",
             populate: {
-                path: "application", // chính là field bên trong applicationSetting
-                model: "Application"
+                path: "application",
+                populate: {
+                    path: "icon",
+                    model: "AppIcon",
+                }
             }
         })
         .exec()
