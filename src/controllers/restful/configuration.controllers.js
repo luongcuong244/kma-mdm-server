@@ -1,6 +1,5 @@
 const Configuration = require("../../models/configuration.model");
-const mongoose = require("mongoose");
-const { populate } = require("../../models/deviceInfo.model");
+const Device = require("../../models/device.model");
 
 exports.getAll = async (req, res) => {
     try {
@@ -53,26 +52,32 @@ exports.getConfiguration = async (req, res) => {
 };
 
 exports.getServerConfig = async (req, res) => {
-    let config = await Configuration.findOne()
+    const deviceId = "000"
+    let device = await Device.findOne({ deviceId })
         .populate({
-            path: "applications",
+            path: "configuration",
             populate: {
-                path: "application",
+                path: "applications",
                 populate: {
-                    path: "icon",
-                    model: "AppIcon",
+                    path: "application",
+                    populate: {
+                        path: "icon",
+                        model: "AppIcon",
+                    }
                 }
             }
         })
         .exec()
 
-    if (config) {
+    if (device && device.configuration) {
         return res.status(200).json({
             message: "Get server config successfully",
-            data: config,
+            data: device.configuration,
         });
     }
-    return res.status(404);
+    return res.status(404).json({
+        message: "Device not found",
+    });
 }
 
 exports.saveConfiguration = async (req, res) => {
