@@ -1,6 +1,8 @@
 const Configuration = require("../../models/configuration.model");
 const Device = require("../../models/device.model");
 
+const { getSHA1String } = require("../../helper/crypto");
+
 exports.getAll = async (req, res) => {
     try {
         const searchTerm = req.query.searchTerm || "";
@@ -52,7 +54,35 @@ exports.getConfiguration = async (req, res) => {
 };
 
 exports.getServerConfig = async (req, res) => {
-    const deviceId = "000"
+    const { deviceInfo, deviceId, signature } = req.body;
+
+    if (!deviceId) {
+        console.log("Thiếu deviceId");
+        return res.status(400).json({
+            message: "Thiếu deviceId",
+        });
+    }
+
+    if (!signature) {
+        console.log("Thiếu chữ ký");
+        return res.status(400).json({
+            message: "Thiếu chữ ký",
+        });
+    }
+
+    const serverSignature = getSHA1String(process.env.MOBILE_SIGNATURE + deviceId);
+
+    if (serverSignature !== signature) {
+        console.log("Chữ ký không hợp lệ");
+        return res.status(400).json({
+            message: "Chữ ký không hợp lệ",
+        });
+    }
+
+    console.log("deviceId: ", deviceId);
+    console.log("signature: ", signature);
+    console.log("Device Info: ", deviceInfo);
+
     let device = await Device.findOne({ deviceId })
         .populate({
             path: "configuration",
@@ -69,14 +99,44 @@ exports.getServerConfig = async (req, res) => {
         })
         .exec()
 
-    if (device && device.configuration) {
-        return res.status(200).json({
-            message: "Get server config successfully",
-            data: device.configuration,
+    if (!device) {
+        console.log("Device không tồn tại");
+        return res.status(400).json({
+            message: "Device không tồn tại",
         });
     }
-    return res.status(404).json({
-        message: "Device not found",
+
+    let deviceInfoObj = device.deviceInfo;
+
+    if (deviceInfoObj) {
+        // Check if deviceInfo is different
+        if (deviceInfoObj.deviceBuildId !== deviceInfo.deviceBuildId) {
+            console.log("DeviceId này đã được đăng ký trên thiết bị khác");
+            return res.status(400).json({
+                message: "DeviceId này đã được đăng ký trên thiết bị khác",
+            });
+        }
+    } else {
+        // update deviceInfo
+        await Device.findByIdAndUpdate(
+            device._id,
+            {
+                deviceInfo: deviceInfo
+            },
+            { new: true }
+        )
+    }
+
+    if (!device.configuration) {
+        console.log("Device chưa có cấu hình");
+        return res.status(400).json({
+            message: "Device chưa có cấu hình",
+        });
+    }
+
+    return res.status(200).json({
+        message: "Get server config successfully",
+        data: device.configuration,
     });
 }
 

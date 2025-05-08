@@ -23,7 +23,7 @@ const deviceSchema = new schema({
     status: {
         type: String,
         enum: ['active', 'inactive'],
-        default: 'active',
+        default: 'inactive',
     },
     deviceInfo: {
         type: Object,

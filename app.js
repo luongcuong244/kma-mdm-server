@@ -39,13 +39,50 @@ const server = http
     .createServer(app)
     .listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-// const socketIO = require("socket.io");
+/* config for socket */
+const socketIO = require("socket.io");
+const deviceModel = require("./src/models/device.model");
+
+const { socketAuth } = require("./src/socket/socketAuth");
+const { socketMobileHandler } = require("./src/socket/socketMobileHandler");
+
+const io = socketIO(server, {
+    cors: {
+        origin: "*",
+    },
+});
+
+io.use(socketAuth);
+
+io.on("connection", (socket) => {
+    console.log("New client connected: " + socket.id);
+    console.log("Socket data: ", JSON.stringify(socket.data));
+    
+    if (socket.data.isHost && socket.data.deviceId) {
+        // update status to active
+        deviceModel.findOneAndUpdate(
+            { deviceId: socket.data.deviceId },
+            { status: "active" }
+        )
+    }
+
+    socket.on('disconnect', async (reason) => {
+        console.log("Client disconnected: " + socket.id, "Reason: " + reason);
+        if (socket.data.isHost && socket.data.deviceId) {
+            // update status to inactive
+            await deviceModel.findOneAndUpdate(
+                { deviceId: socket.data.deviceId },
+                { status: "inactive" }
+            )
+        }
+        socket.removeAllListeners();
+        socket.data = undefined;
+    });
+
+    socketMobileHandler(io, socket);
+})
+
 // // const driverModel = require("./models/driverModel");
-// const io = socketIO(server, {
-//     cors: {
-//         origin: "*",
-//     },
-// });
 
 // const booking = require("./controllers/sockets/booking");
 // const connectSocket = require("./controllers/sockets/connectSocket");
