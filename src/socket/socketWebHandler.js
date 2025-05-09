@@ -20,11 +20,7 @@ const socketWebHandler = (io, socket) => {
             return;
         }
         deviceSocket.emit("mobile:receive:view_device_status", {
-            status: "success",
-            data: {
-                webSocketId: socket.id,
-            },
-            message: "Yêu cầu xem trạng thái thiết bị đã được gửi",
+            webSocketId: socket.id,
         });
     })
 }
