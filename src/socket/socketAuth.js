@@ -7,15 +7,13 @@ const socketAuth = (socket, next) => {
 
     try {
         const hostToken = socket.handshake.auth.hostToken;
-        const clientId = socket.handshake.auth.clientId;
+        const clientToken = socket.handshake.auth.clientToken;
 
-        if (!hostToken && !clientId) throw new Error('NO_TOKEN_FOUND');
+        if (!hostToken && !clientToken) throw new Error('NO_TOKEN_FOUND');
 
-        if (clientId) {
+        if (clientToken) {
             socket.data.isHost = false;
             socket.data.isClient = true;
-            socket.data.clientId = clientId;
-
             clearTimeout(timeoutId);
             next();
             return;

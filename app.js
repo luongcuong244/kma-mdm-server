@@ -45,6 +45,7 @@ const deviceModel = require("./src/models/device.model");
 
 const { socketAuth } = require("./src/socket/socketAuth");
 const { socketMobileHandler } = require("./src/socket/socketMobileHandler");
+const { socketWebHandler } = require("./src/socket/socketWebHandler");
 
 const io = socketIO(server, {
     cors: {
@@ -80,6 +81,7 @@ io.on("connection", (socket) => {
     });
 
     socketMobileHandler(io, socket);
+    socketWebHandler(io, socket);
 })
 
 // // const driverModel = require("./models/driverModel");
