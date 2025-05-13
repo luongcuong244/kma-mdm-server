@@ -37,6 +37,42 @@ const deviceSchema = new schema({
         type: String,
         default: null,
     },
+    factoryReset: {
+        type: Boolean,
+        default: false,
+    },
+    factoryResetRequested: {
+        type: Date,
+        default: null,
+    },
+    factoryResetConfirmed: {
+        type: Date,
+        default: null,
+    },
+    reboot: {
+        type: Boolean,
+        default: false,
+    },
+    rebootRequested: {
+        type: Date,
+        default: null,
+    },
+    rebootConfirmed: {
+        type: Date,
+        default: null,
+    },
+    lock: {
+        type: Boolean,
+        default: false,
+    },
+    lockMessage: {
+        type: String,
+        default: null,
+    },
+    passwordReset: {
+        type: mongoose.Schema.Types.String,
+        default: null,
+    }
 },
 );
 

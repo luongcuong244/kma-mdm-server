@@ -136,7 +136,14 @@ exports.getServerConfig = async (req, res) => {
 
     return res.status(200).json({
         message: "Get server config successfully",
-        data: device.configuration,
+        data: {
+            ...JSON.parse(JSON.stringify(device.configuration)),
+            factoryReset: device.factoryReset,
+            reboot: device.reboot,
+            lock: device.lock,
+            lockMessage: device.lockMessage,
+            passwordReset: device.passwordReset,
+        },
     });
 }
 

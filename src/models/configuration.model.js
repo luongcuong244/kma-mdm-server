@@ -164,11 +164,6 @@ const configurationSchema = new schema({
         type: mongoose.Schema.Types.Boolean,
         default: false,
     },
-    // Other Settings
-    passwordReset: {
-        type: mongoose.Schema.Types.String,
-        default: null,
-    }
 },
 );
 
