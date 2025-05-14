@@ -6,5 +6,6 @@ const controller = require("../controllers/restful/device.controllers");
 
 router.get("/get-device-list", [verifyAccessToken], controller.getDeviceList);
 router.post("/add-new-device", [verifyAccessToken], controller.addNewDevice);
+router.get("/get-device-by-id/:deviceId", [verifyAccessToken], controller.getDeviceById);
 
 module.exports = router;

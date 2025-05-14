@@ -19,6 +19,18 @@ exports.getDeviceList = async (req, res) => {
     });
 }
 
+exports.getDeviceById = async (req, res) => {
+    const { deviceId } = req.params;
+    const device = await Device.findById({ deviceId });
+    if (!device) {
+        return res.status(404).json({ message: "Không tìm thấy thiết bị" });
+    }
+    return res.status(200).json({
+        message: "Thông tin thiết bị",
+        data: device,
+    });
+}
+
 exports.addNewDevice = async (req, res) => {
     const { deviceId, description, configurationId, phoneNumber } = req.body;
 
