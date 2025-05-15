@@ -20,8 +20,8 @@ exports.getDeviceList = async (req, res) => {
 }
 
 exports.getDeviceById = async (req, res) => {
-    const { deviceId } = req.params;
-    const device = await Device.findById({ deviceId });
+    const { deviceId } = req.query;
+    const device = await Device.findOne({ deviceId })
     if (!device) {
         return res.status(404).json({ message: "Không tìm thấy thiết bị" });
     }
