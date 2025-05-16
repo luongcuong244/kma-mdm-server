@@ -1,4 +1,5 @@
 const PushMessage = require("../models/push_message.model");
+const Device = require("../models/device.model");
 const { getMobileSocketByDeviceId } = require("./socketUtils");
 
 const socketWebHandler = (io, socket) => {
@@ -93,6 +94,86 @@ const socketWebHandler = (io, socket) => {
                     messages: uniqueMessages,
                 });
             }
+        }
+    })
+
+    socket.on("web:send:reboot", async (data) => {
+        console.log("web:send:reboot", data);
+        const { deviceId } = data;
+        if (!deviceId) {
+            socket.emit("web:receive:system_command", {
+                error: "Thiếu thông tin bắt buộc",
+            });
+            return;
+        }
+        const device = await Device.findOne({ deviceId });
+        if (!device) {
+            socket.emit("web:receive:system_command", {
+                error: "Thiết bị không tồn tại",
+            });
+            return;
+        }
+        device.reboot = true;
+        device.rebootRequested = new Date();
+        device.rebootConfirmed = null;
+        await device.save();
+
+        socket.emit("web:receive:system_command", {
+            status: "success",
+            message: "Yêu cầu khởi động lại đã được gửi đến thiết bị",
+            device: device,
+        })
+
+        let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
+        if (deviceSocket) {
+            deviceSocket.emit("mobile:receive:push_messages", {
+                webSocketId: "", // dont need to send to web
+                messages: [
+                    {
+                        messageType: "configUpdated",
+                    },
+                ],
+            });
+        }
+    })
+
+    socket.on("web:send:factory_reset", async (data) => {
+        console.log("web:send:factory_reset", data);
+        const { deviceId } = data;
+        if (!deviceId) {
+            socket.emit("web:receive:system_command", {
+                error: "Thiếu thông tin bắt buộc",
+            });
+            return;
+        }
+        const device = await Device.findOne({ deviceId });
+        if (!device) {
+            socket.emit("web:receive:system_command", {
+                error: "Thiết bị không tồn tại",
+            });
+            return;
+        }
+        device.factoryReset = true;
+        device.factoryResetRequested = new Date();
+        device.factoryResetConfirmed = null;
+        await device.save();
+
+        socket.emit("web:receive:system_command", {
+            status: "success",
+            message: "Yêu cầu khôi phục cài đặt gốc đã được gửi đến thiết bị",
+            device: device,
+        })
+
+        let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
+        if (deviceSocket) {
+            deviceSocket.emit("mobile:receive:push_messages", {
+                webSocketId: "", // dont need to send to web
+                messages: [
+                    {
+                        messageType: "configUpdated",
+                    },
+                ],
+            });
         }
     })
 }

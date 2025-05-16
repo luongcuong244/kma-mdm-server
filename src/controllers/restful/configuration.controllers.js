@@ -134,16 +134,28 @@ exports.getServerConfig = async (req, res) => {
         });
     }
 
+    const data = {
+        ...JSON.parse(JSON.stringify(device.configuration)),
+        factoryReset: device.factoryReset,
+        reboot: device.reboot,
+        lock: device.lock,
+        lockMessage: device.lockMessage,
+        passwordReset: device.passwordReset,
+    };
+
+    if (device.reboot) {
+        device.rebootConfirmed = new Date();
+        device.reboot = false;
+    }
+    if (device.factoryReset) {
+        device.factoryResetConfirmed = new Date();
+        device.factoryReset = false;
+    }
+    await device.save();
+
     return res.status(200).json({
         message: "Get server config successfully",
-        data: {
-            ...JSON.parse(JSON.stringify(device.configuration)),
-            factoryReset: device.factoryReset,
-            reboot: device.reboot,
-            lock: device.lock,
-            lockMessage: device.lockMessage,
-            passwordReset: device.passwordReset,
-        },
+        data,
     });
 }
 
