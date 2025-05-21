@@ -84,34 +84,27 @@ io.on("connection", (socket) => {
     socketWebHandler(io, socket);
 })
 
-// // const driverModel = require("./models/driverModel");
+// for remote function
 
-// const booking = require("./controllers/sockets/booking");
-// const connectSocket = require("./controllers/sockets/connectSocket");
+const { socketRemoteHandlerClient } = require("./src/socket/socketRemoteHandlerClient");
+const { socketRemoteHostHandler } = require("./src/socket/socketRemoteHandlerHost");
+const { socketRemoteAuth } = require("./src/socket/socketRemoteAuth");
 
-// booking(io);
-// connectSocket(io);
+const remoteNamespace = io.of("/remote");
 
-// io.on("connection", (socket) => {
-//   console.log("New client connected: " + socket.id);
+remoteNamespace.use(socketRemoteAuth);
+remoteNamespace.on("connection", (socket) => {
+    console.log("New remote client connected: " + socket.id);
 
-//   socket.emit("connected", socket.id);
+    socket.on('disconnect', async (reason, description) => {
+        console.log("Remote client disconnected: " + socket.id, "Reason: " + reason);
+        socket.removeAllListeners();
+        socket.data = undefined;
+    });
 
-//   // Xử lý khi tài xế đăng nhập thành công
-//   // socket.on("driver-login", async (driverData) => {
-//   //   // Lưu socket ID vào schema của tài khoản tài xế
-//   //   try {
-//   //     const { idDriver, socketId } = driverData;
-//   //     await driverModel.findOneAndUpdate(
-//   //       { _id: idDriver },
-//   //       { socketId: socketId },
-//   //       { new: true }
-//   //     );
-//   //     // console.log(respone);
-//   //   } catch (err) {
-//   //     console.error("Error saving socket ID:", err);
-//   //   }
-//   // });
-// });
+    socket.data.errorCounter = 0;
+    socketRemoteHostHandler(remoteNamespace, socket);
+    socketRemoteHandlerClient(remoteNamespace, socket);
+});
 
 module.exports = app;
