@@ -65,7 +65,31 @@ const deviceInfoSchema = new schema({
     totalStorage: {
         required: true,
         type: Number
-    }
+    },
+    fullScreenWidth: {
+        required: true,
+        type: Number
+    },
+    fullScreenHeight: {
+        required: true,
+        type: Number
+    },
+    displayScreenWidth: {
+        required: true,
+        type: Number
+    },
+    displayScreenHeight: {
+        required: true,
+        type: Number
+    },
+    statusBarHeight: {
+        required: true,
+        type: Number
+    },
+    navigationBarHeight: {
+        required: true,
+        type: Number
+    },
 },
 );
 

@@ -63,9 +63,9 @@ exports.addNewDevice = async (req, res) => {
 
     // Tạo dữ liệu QR provisioning
     const qrCodeData = {
-        "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": configuration.adminReceiverClass,
-        "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": latestVersion.url,
-        "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM": latestVersion.checksum || "KxXFkzx_0qN0iqmS8etdfrjNx7sGq7HDM5fNQeDtBfk=",
+        "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.example.kmamdm/.AdminReceiver",
+        "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://download1584.mediafire.com/kxftzt6kz2mgTxFkwVxv8BlvcgWZNv3QuBormEXNhbfZpSG-en6eciIW3EzgWwvFrAkhnEYHW_P0vn9ZwgrA1EnsgI420TlzmznxdQ17xTnuUjIkT0KCB1ETIa5ulCAOzbgoXxdPmNsC1uq1RUmLFonAQfjImqwpImEb9BNdARFd/nnbo1uofypv251k/KMA-MDM-21-5-2025",
+        "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM": "vzbl8IHlhHwjKvVPd/bxt+VI1H+Kg6zhuVx79yjbnrI",
         "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
         "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": true,
         "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
