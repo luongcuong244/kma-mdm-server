@@ -33,16 +33,19 @@ exports.signIn = async (req, res) => {
     if (user.isBlocked) {
         console.log("User is blocked!");
         return res.status(400).send({
-            message: "Người dùng đã bị khóa!",
+            message: `Tài khoản đang bị khóa với lý do: ${user.blockedReason}` || "Người dùng đã bị khóa!",
         });
     }
     // Create token
     const { password, refreshToken, ...userData } = user.toObject();
-    const accessToken = generateAccessToken(user._id);
+    const accessToken = generateAccessToken(user._id, user.role);
     const newRefreshToken = generateRefreshToken(user._id);
     await User.findByIdAndUpdate(
         user._id,
-        { refreshToken: newRefreshToken },
+        { 
+            lastLogin: new Date(),
+            refreshToken: newRefreshToken
+        },
         { new: true }
     );
     // Lưu access token vào cookie

@@ -21,10 +21,34 @@ const userSchema = new schema({
         type: Boolean,
         default: false,
     },
+    blockedReason: {
+        type: String,
+        default: null,
+    },
+    maxManagedDevices: {
+        type: Number,
+        default: 10,
+    },
+    maxProvidedStorage: {
+        type: Number,
+        default: 10, // Giới hạn dung lượng lưu trữ tối đa (tính bằng GB)
+    },
     refreshToken: {
         type: String,
         default: null,
-    }
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now,
+    },
+    lastLogin: {
+        type: Date,
+        default: null,
+    },
 },
 );
 
@@ -45,6 +69,10 @@ userSchema.methods = {
     isCorrectPassword: async function (password) {
         if (!this.password) return false;
         return bcrypt.compare(password, this.password);
+    },
+    countManagedDevices: async function () {
+        const Device = require('./device.model'); // Thay đổi đường dẫn nếu cần
+        return await Device.countDocuments({ managedBy: this._id });
     },
 };
 

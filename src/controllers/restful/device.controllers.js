@@ -1,4 +1,5 @@
 const Device = require("../../models/device.model");
+const User = require("../../models/user.model");
 const Configuration = require("../../models/configuration.model");
 const Application = require("../../models/application.model");
 const path = require("path");
@@ -7,7 +8,16 @@ const QRCode = require("qrcode");
 const QrUtils = require("../../helper/qr_utils");
 
 exports.getDeviceList = async (req, res) => {
-    const devices = await Device.find()
+    const { _id } = req.user;
+
+    const user = await User.findById(_id);
+    if (!user) {
+        return res.status(404).json({ message: "Người dùng không tồn tại" });
+    }
+
+    const devices = await Device.find(
+        { managedBy: _id }
+    )
         .populate("configuration")
         .select("-__v -createdAt -updatedAt")
         .sort({ createdAt: -1 });
@@ -33,6 +43,13 @@ exports.getDeviceById = async (req, res) => {
 }
 
 exports.addNewDevice = async (req, res) => {
+    const { _id } = req.user;
+
+    const user = await User.findById(_id);
+    if (!user) {
+        return res.status(404).json({ message: "Người dùng không tồn tại" });
+    }
+
     const { deviceId, description, configurationId, phoneNumber } = req.body;
 
     if (!deviceId) {
@@ -72,6 +89,7 @@ exports.addNewDevice = async (req, res) => {
 
         // Lưu thiết bị
         const newDevice = new Device({
+            managedBy: _id,
             deviceId,
             description,
             configuration: configurationId,

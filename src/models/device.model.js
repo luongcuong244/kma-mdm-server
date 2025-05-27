@@ -3,6 +3,11 @@ const schema = mongoose.Schema;
 const configurationModel = require('./configuration.model');
 
 const deviceSchema = new schema({
+    managedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
     deviceId: {
         required: true,
         type: String
