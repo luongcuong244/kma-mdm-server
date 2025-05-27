@@ -4,6 +4,7 @@ const Application = require("../../models/application.model");
 const path = require("path");
 const fs = require("fs");
 const QRCode = require("qrcode");
+const QrUtils = require("../../helper/qr_utils");
 
 exports.getDeviceList = async (req, res) => {
     const devices = await Device.find()
@@ -61,34 +62,13 @@ exports.addNewDevice = async (req, res) => {
         (prev.versionCode > current.versionCode) ? prev : current
     );
 
-    // Tạo dữ liệu QR provisioning
-    const qrCodeData = {
-        "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.example.kmamdm/com.example.kmamdm.AdminReceiver",
-        "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://onehost-wphn032504.000nethost.com:2023/website/preview/luongcuong244.id.vn/static/kmamdm.apk",
-        "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM": "fMy7UfzfB7HumjwzgskPjlVLxmQ1LwEBsRgyffN3xP0=",
-        "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
-        "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": true,
-        "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
-            "DEVICE_ID": deviceId,
-        }
-    };
-
-    // Tạo đường dẫn QR
-    const qrFolderPath = path.join(__dirname, "..", "..", "public", "qr");
-    if (!fs.existsSync(qrFolderPath)) {
-        fs.mkdirSync(qrFolderPath, { recursive: true });
-    }
-
-    const fileName = `${deviceId}.png`;
-    const qrImagePath = path.join(qrFolderPath, fileName);
-
     // Tạo và lưu mã QR
     try {
-        await QRCode.toFile(qrImagePath, JSON.stringify(qrCodeData), {
-            type: "png",
-            errorCorrectionLevel: "H",
-            width: 700,
-        });
+        const qrCode = await QrUtils.createQrCode(deviceId, configuration);
+        if (!qrCode) {
+            console.error("Lỗi tạo QR:", error);
+            return res.status(500).json({ message: "Lỗi khi tạo mã QR hoặc lưu thiết bị" });
+        }
 
         // Lưu thiết bị
         const newDevice = new Device({
@@ -96,16 +76,103 @@ exports.addNewDevice = async (req, res) => {
             description,
             configuration: configurationId,
             phoneNumber,
-            qrCode: `/qr/${fileName}`
+            qrCode: qrCode,
         });
         await newDevice.save();
 
+        // return newDevice with full configuration
+        const populatedDevice = await Device.findById(newDevice._id)
+            .populate("configuration")
+            .select("-__v -createdAt -updatedAt");
+        if (!populatedDevice) {
+            return res.status(404).json({ message: "Không tìm thấy thiết bị sau khi lưu" });
+        }
+
         return res.status(201).json({
             message: "Thiết bị đã được thêm và mã QR đã được tạo",
-            data: newDevice,
+            data: populatedDevice,
         });
     } catch (error) {
         console.error("Lỗi tạo QR:", error);
         return res.status(500).json({ message: "Lỗi khi tạo mã QR hoặc lưu thiết bị" });
     }
 };
+
+exports.deleteDeviceById = async (req, res) => {
+    const { deviceId } = req.body;
+
+    if (!deviceId) {
+        return res.status(400).json({ message: "Mã thiết bị không được để trống" });
+    }
+
+    const device = await Device.findOneAndDelete({ deviceId });
+    if (!device) {
+        return res.status(404).json({ message: "Không tìm thấy thiết bị" });
+    }
+
+    // Xóa file QR nếu tồn tại
+    QrUtils.deleteQrCodeByPath(device.qrCode);
+
+    return res.status(200).json({
+        message: "Thiết bị đã được xóa",
+        data: device,
+    });
+}
+
+exports.updateDeviceById = async (req, res) => {
+    const { deviceId, description, configurationId, phoneNumber } = req.body;
+
+    if (!deviceId) {
+        return res.status(400).json({ message: "Mã thiết bị không được để trống" });
+    }
+
+    const device = await Device.findOne({ deviceId });
+    if (!device) {
+        return res.status(404).json({ message: "Không tìm thấy thiết bị" });
+    }
+
+    if (description) {
+        device.description = description;
+    }
+
+    let isConfigurationChanged = false;
+
+    if (configurationId) {
+        const configuration = await Configuration.findById(configurationId);
+        if (!configuration) {
+            return res.status(400).json({ message: "Mã cấu hình không tồn tại" });
+        }
+        if (device.configuration && device.configuration.toString() !== configurationId) {
+            // Nếu cấu hình đã thay đổi, xóa mã QR cũ
+            console.log("Cấu hình đã thay đổi, xóa mã QR cũ");
+            QrUtils.deleteQrCodeByPath(device.qrCode);
+            isConfigurationChanged = true;
+        }
+        device.configuration = configurationId;
+
+        // Tạo mã QR mới nếu cấu hình đã thay đổi
+        if (isConfigurationChanged) {
+            console.log("Tạo mã QR mới cho thiết bị");
+            const newQrCode = await QrUtils.createQrCode(deviceId, configuration);
+            if (!newQrCode) {
+                return res.status(500).json({ message: "Lỗi khi tạo mã QR mới" });
+            }
+            device.qrCode = newQrCode;
+        } else {
+            console.log("Cấu hình không thay đổi, giữ nguyên mã QR cũ");
+        }
+    }
+    if (phoneNumber) {
+        device.phoneNumber = phoneNumber;
+    }
+
+    await device.save();
+
+    const populatedDevice = await Device.findById(device._id)
+        .populate("configuration");
+
+    return res.status(200).json({
+        message: "Thiết bị đã được cập nhật",
+        data: populatedDevice,
+    });
+}

@@ -121,7 +121,8 @@ exports.getServerConfig = async (req, res) => {
         await Device.findByIdAndUpdate(
             device._id,
             {
-                deviceInfo: deviceInfo
+                deviceInfo: deviceInfo,
+                enrollDate: new Date(),
             },
             { new: true }
         )
