@@ -302,6 +302,20 @@ exports.addApkVersion = async (req, res) => {
             application.versions.push(newVersion);
             await application.save();
 
+            // Cập nhật application trong cấu hình
+            const configurations = await Configuration.find({ "applications.application.pkg": packageName });
+            for (const config of configurations) {
+                config.applications = config.applications.map(app => {
+                    if (app.application.pkg === packageName) {
+                        app.application.versions = application.versions; // Cập nhật phiên bản mới
+                    }
+                    return app;
+                });
+
+                config.markModified("applications");
+                await config.save();
+            }
+            
             return res.status(200).json({
                 message: "Thêm phiên bản APK thành công",
                 data: newVersion,
@@ -353,6 +367,25 @@ exports.deleteApkVersion = async (req, res) => {
         application.versions = newVersions;
         await application.save();
 
+        // Cập nhật application trong cấu hình
+        const configurations = await Configuration.find({ "applications.application.pkg": packageName });
+        for (const config of configurations) {
+            config.applications = config.applications.map(app => {
+                if (app.application.pkg === packageName) {
+                    app.application.versions = newVersions; // Cập nhật phiên bản mới
+                    // Cập nhật cấu hình ứng dụng
+                    let isInVersionList = newVersions.some(version => version.versionCode === app.version.versionCode);
+                    if (!isInVersionList) {
+                        app.version = app.application.versions[app.application.versions.length - 1]; // Cập nhật phiên bản mới nhất
+                    }
+                }
+                return app;
+            });
+
+            config.markModified("applications");
+            await config.save();
+        }
+
         return res.status(200).json({
             message: "Xóa phiên bản APK thành công",
             data: newVersions,
@@ -388,5 +421,48 @@ exports.getAvailableApplicationForConfig = async (req, res) => {
     } catch (err) {
         console.error("Lỗi khi lấy ứng dụng:", err);
         return res.status(500).json({ status: "ERROR", message: "Failed to add application" });
+    }
+}
+
+exports.deleteApplication = async (req, res) => {
+    const { packageName } = req.body;
+    if (!packageName) {
+        return res.status(400).json({
+            message: "Thông tin không hợp lệ",
+        });
+    }
+
+    try {
+        // check packageName
+        const application = await Application.findOne({ pkg: packageName });
+        if (!application) {
+            return res.status(400).json({
+                message: "Ứng dụng không tồn tại",
+            });
+        }
+
+        // Kiểm tra xem ứng dụng có được sử dụng trong cấu hình nào không
+        const configurations = await Configuration.find({ "applications.application.pkg": application.pkg });
+        if (configurations.length > 0) {
+            const configNames = configurations.map(config => config.name).join(", ");
+            return res.status(400).json({
+                message: "Ứng dụng đang được sử dụng trong cấu hình: " + configNames + ". Vui lòng xóa ứng dụng khỏi cấu hình trước khi xóa.",
+            });
+        }
+
+        // Xóa ứng dụng
+        await Application.deleteOne({ pkg: packageName });
+
+        // Xóa icon nếu có
+        if (application.icon) {
+            await AppIcon.deleteOne({ _id: application.icon });
+        }
+
+        return res.status(200).json({
+            message: "Xóa ứng dụng thành công",
+        });
+    } catch (err) {
+        console.error("Lỗi khi xóa ứng dụng:", err);
+        return res.status(500).json({ status: "ERROR", message: "Failed to delete application" });
     }
 }
