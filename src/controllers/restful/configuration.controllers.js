@@ -195,3 +195,87 @@ exports.saveConfiguration = async (req, res) => {
         });
     }
 }
+
+exports.deleteConfiguration = async (req, res) => {
+    const { id } = req.body;
+    try {
+        const configuration = await Configuration.findOne({
+            _id: id,
+        });
+        if (!configuration) {
+            return res.status(404).json({
+                message: "Không tìm thấy cấu hình",
+            });
+        }
+
+        // Kiểm tra xem cấu hình có được sử dụng bởi thiết bị nào không
+        const devicesUsingConfig = await Device.findOne({
+            configuration: id,
+        });
+
+        if (devicesUsingConfig) {
+            return res.status(400).json({
+                message: "Cấu hình này đang được sử dụng bởi thiết bị khác",
+            });
+        }
+
+        // Xóa cấu hình
+        await Configuration.deleteOne({ _id: id });
+        console.log("Đã xóa cấu hình:", id);
+
+        return res.status(200).json({
+            message: "Xóa cấu hình thành công",
+        });
+    } catch (err) {
+        console.error("Error deleting configuration:", err);
+        return res.status(500).json({
+            message: "Lỗi server",
+        });
+    }
+}
+
+exports.copyConfiguration = async (req, res) => {
+    const { configurationId, name, description } = req.body;
+    try {
+        if (!configurationId || !name) {
+            return res.status(400).json({
+                message: "Thiếu thông tin cấu hình hoặc tên mới",
+            });
+        }
+
+        const configuration = await Configuration.findById(configurationId);
+        if (!configuration) {
+            return res.status(404).json({
+                message: "Không tìm thấy cấu hình",
+            });
+        }
+
+        // Kiểm tra nếu tên trùng với tên hiện tại
+        if (name && name == configuration.name) {
+            return res.status(400).json({
+                message: "Đã có cấu hình với tên này",
+            });
+        }
+
+        // Tạo bản sao của cấu hình
+        const { _id, ...configData } = configuration.toObject();
+        const newConfiguration = new Configuration({
+            ...configData,
+            name: name || configuration.name,
+            description: description || configuration.description,
+        });
+
+        // Lưu bản sao
+        await newConfiguration.save();
+
+        return res.status(200).json({
+            message: "Sao chép cấu hình thành công",
+            data: newConfiguration,
+        });
+    } catch (err) {
+        console.error("Error copying configuration:", err);
+        return res.status(500).json({
+            message: "Lỗi server",
+        });
+    }
+}

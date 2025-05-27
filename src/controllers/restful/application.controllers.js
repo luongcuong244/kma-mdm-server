@@ -398,15 +398,16 @@ exports.deleteApkVersion = async (req, res) => {
 
 exports.getAvailableApplicationForConfig = async (req, res) => {
     try {
-        const {
-            configId,
-        } = req.body;
+        // const {
+        //     configId,
+        // } = req.body;
 
-        console.log("Received data:", req.body);
+        // console.log("Received data:", req.body);
 
         const allApplications = await Application.find();
-        const config = await Configuration.findById(configId);
-        if (!config) {
+        // const config = await Configuration.findById(configId);
+        // if (!config) {
+        if (1 === 1) {
             return res.status(200).json({
                 data: allApplications,
             });

@@ -11,5 +11,7 @@ router.post("/get-server-config", controller.getServerConfig);
 router.get("/get-all", [verifyAccessToken], controller.getAll);
 router.get("/get-configuration", [verifyAccessToken], controller.getConfiguration);
 router.post("/save-configuration", [verifyAccessToken], controller.saveConfiguration);
+router.post("/delete-configuration", [verifyAccessToken], controller.deleteConfiguration);
+router.post("/copy-configuration", [verifyAccessToken], controller.copyConfiguration);
 
 module.exports = router;
