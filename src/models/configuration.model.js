@@ -119,6 +119,10 @@ const configurationSchema = new schema({
         type: mongoose.Schema.Types.String,
         required: true,
     },
+    mdmChecksum: {
+        type: mongoose.Schema.Types.String,
+        required: true,
+    },
     adminReceiverClass: {
         type: mongoose.Schema.Types.String,
         required: true,

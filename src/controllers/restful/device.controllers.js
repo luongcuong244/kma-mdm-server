@@ -75,10 +75,6 @@ exports.addNewDevice = async (req, res) => {
         return res.status(400).json({ message: "Ứng dụng MDM không tồn tại hoặc không có phiên bản nào" });
     }
 
-    const latestVersion = mdmApplication.versions.reduce((prev, current) =>
-        (prev.versionCode > current.versionCode) ? prev : current
-    );
-
     // Tạo và lưu mã QR
     try {
         const qrCode = await QrUtils.createQrCode(deviceId, configuration);
