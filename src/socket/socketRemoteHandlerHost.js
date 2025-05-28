@@ -1,4 +1,4 @@
-import logger from '../logger.js';
+const logger = require('../logger.js');
 
 const SOCKET_TIMEOUT = 15000; // Untill Android app updates
 
@@ -322,4 +322,6 @@ const socketRemoteHostHandler = (io, socket) => {
     }
 }
 
-export { socketRemoteHostHandler };
+module.exports = {
+    socketRemoteHostHandler
+}

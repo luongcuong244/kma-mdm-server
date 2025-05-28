@@ -1,8 +1,8 @@
-import logger from '../logger.js';
-import dgram from 'node:dgram';
-import { Buffer } from 'node:buffer';
-import { createHmac } from 'crypto';
-import { SERVER_ORIGIN, TURN2_SHARED_SECRET } from '../constant.js';
+const logger = require('../logger.js');
+const dgram = require('node:dgram');
+const { Buffer } = require('node:buffer');
+const { createHmac } = require('crypto');
+const { SERVER_ORIGIN, TURN2_SHARED_SECRET } = require('../constant.js');
 
 const GOOGLE_STUN_SERVERS_ADDRESS = [
     'stun.l.google.com',
@@ -96,8 +96,12 @@ function recheckInactiveServers() {
 updateActiveServers();
 recheckInactiveServers();
 
-export function getIceServers(username) {
+function getIceServers(username) {
     return [getStunServer(), getTurnServer(username)];
+}
+
+module.exports = {
+    getIceServers,
 }
 
 function getStunServer() {

@@ -8,7 +8,8 @@ require("dotenv").config()
 
 const connectDatabase = async () => {
     try {
-        const databaseConfig = "mongodb://127.0.0.1/KmaMdm";
+        // const databaseConfig = "mongodb://127.0.0.1/KmaMdm";
+        const databaseConfig = process.env.MONGODB_URI || "mongodb://127.0.0.1/KmaMdm"
         const connect = await mongoose.connect(databaseConfig);
         console.log(`da ket noi mongodb: ${connect.connection.host}`);
         createAdminUser();

@@ -1,6 +1,6 @@
-import logger from '../logger.js';
-import { getIceServers } from './iceServers.js';
-import { getStreamId, getHostSocket } from './stream.js';
+const logger = require("../logger.js");
+const { getIceServers } = require('./iceServers.js');
+const { getStreamId, getHostSocket } = require('./stream.js');
 
 const SOCKET_TIMEOUT = 5000;
 
@@ -401,4 +401,6 @@ const socketRemoteHandlerClient = (io, socket) => {
     }
 }
 
-export { socketRemoteHandlerClient };
+module.exports = {
+    socketRemoteHandlerClient
+};

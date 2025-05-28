@@ -35,4 +35,6 @@ const socketRemoteAuth = (socket, next) => {
   }
 }
 
-export { socketRemoteAuth };
+module.exports = {
+  socketRemoteAuth
+}
