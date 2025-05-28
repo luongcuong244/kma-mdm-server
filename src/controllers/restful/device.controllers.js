@@ -2,6 +2,7 @@ const Device = require("../../models/device.model");
 const User = require("../../models/user.model");
 const Configuration = require("../../models/configuration.model");
 const Application = require("../../models/application.model");
+const PushMessage = require("../../models/push_message.model");
 const path = require("path");
 const fs = require("fs");
 const QRCode = require("qrcode");
@@ -126,6 +127,9 @@ exports.deleteDeviceById = async (req, res) => {
 
     // Xóa file QR nếu tồn tại
     QrUtils.deleteQrCodeByPath(device.qrCode);
+
+    // Xóa push messages liên quan đến thiết bị này
+    await PushMessage.deleteMany({ deviceId });
 
     return res.status(200).json({
         message: "Thiết bị đã được xóa",
