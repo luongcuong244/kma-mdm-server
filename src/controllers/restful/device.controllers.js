@@ -43,6 +43,30 @@ exports.getDeviceById = async (req, res) => {
     });
 }
 
+exports.getDeviceIdForRemoteControl = async (req, res) => {
+    const { deviceId } = req.query;
+    const device = await Device.findOne({ deviceId })
+    if (!device) {
+        return res.status(404).json({ message: "Không tìm thấy thiết bị" });
+    }
+
+    // Kiểm tra cấu hình thiết bị có app nào có package name là "info.dvkr.screenstream.dev" không
+    const configuration = await Configuration.findById(device.configuration);
+    if (!configuration) {
+        return res.status(404).json({ message: "Không tìm thấy cấu hình thiết bị" });
+    }
+
+    const remoteControlApp = configuration.applications.find(app => app.application.pkg === "info.dvkr.screenstream.dev");
+    if (!remoteControlApp || remoteControlApp.remove) {
+        return res.status(400).json({ message: "Thiết bị phải được cài đặt ứng dụng Remote để có thể điều khiển ( pkg: info.dvkr.screenstream.dev )" });
+    }
+
+    return res.status(200).json({
+        message: "Thông tin thiết bị",
+        data: device,
+    });
+}
+
 exports.addNewDevice = async (req, res) => {
     const { _id } = req.user;
 

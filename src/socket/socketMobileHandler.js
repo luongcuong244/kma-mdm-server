@@ -82,6 +82,39 @@ const socketMobileHandler = async (io, socket) => {
             });
         }
     })
+
+    socket.on("mobile:send:accept_remote_control", async (data) => {
+        const { webSocketId, errorMessage, deviceId } = data;
+
+        if (!webSocketId) {
+            return;
+        }
+
+        const webSocket = await getSocketById(io, webSocketId);
+        if (webSocket) {
+            if (errorMessage) {
+                webSocket.emit("web:receive:accept_remote_control", {
+                    status: "error",
+                    message: errorMessage,
+                });
+                return;
+            }
+            if (deviceId !== socket.data.deviceId) {
+                webSocket.emit("web:receive:accept_remote_control", {
+                    status: "error",
+                    message: "Mã thiết bị không khớp với mã thiết bị của socket",
+                });
+                return;
+            }
+            webSocket.emit("web:receive:accept_remote_control", {
+                status: "success",
+                deviceId: socket.data.deviceId,
+                message: "Yêu cầu điều khiển từ xa đã được xử lý",
+            });
+        } else {
+            console.log("webSocket not found");
+        }
+    })
 }
 
 module.exports = {

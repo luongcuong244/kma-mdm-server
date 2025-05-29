@@ -176,6 +176,33 @@ const socketWebHandler = (io, socket) => {
             });
         }
     })
+
+    socket.on("web:send:request_remote_control", async (data, callback) => {
+        console.log("web:send:request_remote_control", data);
+        const { deviceId } = data;
+        if (!deviceId) {
+            callback({
+                status: "error",
+                message: "Thiếu thông tin bắt buộc ( deviceId )",
+            })
+            return;
+        }
+        let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
+        if (!deviceSocket) {
+            callback({
+                status: "error",
+                message: "Thiết bị không trực tuyến",
+            });
+            return;
+        }
+        deviceSocket.emit("mobile:receive:request_remote_control", {
+            webSocketId: socket.id,
+        });
+        callback({
+            status: "success",
+            message: "Yêu cầu điều khiển từ xa đã được gửi đến thiết bị",
+        });
+    })
 }
 
 module.exports = {
