@@ -180,10 +180,10 @@ const socketWebHandler = (io, socket) => {
     socket.on("web:send:change_device_password", async (data, callback) => {
         console.log("web:send:change_device_password", data);
         const { deviceId, newPassword } = data;
-        if (!deviceId || !newPassword) {
+        if (!deviceId) {
             callback({
                 status: "error",
-                message: "Thiếu thông tin bắt buộc ( deviceId, newPassword )",
+                message: "Thiếu thông tin bắt buộc ( deviceId )",
             })
             return;
         }
