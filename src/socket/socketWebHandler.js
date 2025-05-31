@@ -3,26 +3,58 @@ const Device = require("../models/device.model");
 const { getMobileSocketByDeviceId } = require("./socketUtils");
 
 const socketWebHandler = (io, socket) => {
-    socket.on("web:send:view_device_status", async (data) => {
+    socket.on("web:send:view_device_status", async (data, callback) => {
         console.log("web:send:view_device_status", data);
         const { deviceId } = data;
         if (!deviceId) {
-            socket.emit("web:receive:device_status", {
+            callback({
                 status: "error",
-                message: "Device ID là bắt buộc",
-            });
+                message: "Thiếu thông tin bắt buộc ( deviceId )",
+            })
             return;
         }
         let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
         if (!deviceSocket) {
-            socket.emit("web:receive:device_status", {
+            callback({
                 status: "error",
                 message: "Thiết bị không trực tuyến",
             });
             return;
         }
-        deviceSocket.emit("mobile:receive:view_device_status", {
+        console.log("deviceSocket.id", deviceSocket.id);
+        deviceSocket.timeout(3000).emit("mobile:receive:view_device_status", {
             webSocketId: socket.id,
+        }, (err, response) => {
+            if (err) {
+                console.error("Error receiving device status:", err);
+                callback({
+                    status: "error",
+                    message: "Thiết bị không phản hồi ( timeout )",
+                });
+                return;
+            }
+            if (response && response.status === "success") {
+                if (!response.data || !response.data.deviceStatus) {
+                    console.error("No data in device status response:", response);
+                    callback({
+                        status: "error",
+                        message: "Không có dữ liệu trạng thái thiết bị",
+                    });
+                    return;
+                }
+                console.log("Device status response:", response.data.deviceStatus);
+                callback({
+                    status: "success",
+                    data: JSON.parse(response.data.deviceStatus),
+                });
+            } else {
+                console.error("Error in device status response:", response);
+                callback({
+                    status: "error",
+                    message: response.message || "Lỗi khi nhận trạng thái thiết bị",
+                });
+                return;
+            }
         });
     })
 
