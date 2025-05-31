@@ -177,6 +177,45 @@ const socketWebHandler = (io, socket) => {
         }
     })
 
+    socket.on("web:send:change_device_password", async (data, callback) => {
+        console.log("web:send:change_device_password", data);
+        const { deviceId, newPassword } = data;
+        if (!deviceId || !newPassword) {
+            callback({
+                status: "error",
+                message: "Thiếu thông tin bắt buộc ( deviceId, newPassword )",
+            })
+            return;
+        }
+        const device = await Device.findOne({ deviceId });
+        if (!device) {
+            callback({
+                status: "error",
+                message: "Thiết bị không tồn tại",
+            });
+            return;
+        }
+        device.passwordReset = newPassword;
+        await device.save();
+
+        callback({
+            status: "success",
+            message: "Mật khẩu thiết bị đã được cập nhật thành công",
+        });
+
+        let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
+        if (deviceSocket) {
+            deviceSocket.emit("mobile:receive:push_messages", {
+                webSocketId: "", // dont need to send to web
+                messages: [
+                    {
+                        messageType: "configUpdated",
+                    },
+                ],
+            });
+        }
+    })
+
     socket.on("web:send:request_remote_control", async (data, callback) => {
         console.log("web:send:request_remote_control", data);
         const { deviceId } = data;
