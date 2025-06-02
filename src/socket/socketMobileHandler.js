@@ -34,33 +34,6 @@ const socketMobileHandler = async (io, socket) => {
         });
     }
 
-    socket.on("mobile:send:push_messages", async (data) => {
-        let { webSocketId, messages } = data;
-        messages = JSON.parse(messages);
-        if (!messages) {
-            return;
-        }
-
-        // Set status to sent
-        let promises = messages.map((message) => {
-            return PushMessage.findByIdAndUpdate(
-                message._id,
-                { status: "sent" },
-                { new: false }
-            );
-        });
-        await Promise.all(promises);
-
-        const webSocket = await getSocketById(io, webSocketId);
-        if (webSocket) {
-            webSocket.emit("web:receive:push_messages", {
-                status: "success",
-                data: messages,
-                message: "Tin nhắn đã được gửi",
-            });
-        }
-    })
-
     socket.on("mobile:send:accept_remote_control", async (data) => {
         const { webSocketId, errorMessage, deviceId } = data;
 

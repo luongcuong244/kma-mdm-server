@@ -62,7 +62,7 @@ const socketWebHandler = (io, socket) => {
     socket.on("web:send:get_push_messages", async () => {
         try {
             const pushMessages = await PushMessage.find()
-            // sort by createdAt desc
+                // sort by createdAt desc
                 .sort({ createdAt: -1 })
                 .lean();
             socket.emit("web:receive:get_push_messages", {
@@ -78,54 +78,108 @@ const socketWebHandler = (io, socket) => {
         }
     })
 
-    socket.on("web:send:push_message", async (message) => {
-        console.log("web:send:push_message", message);
-        const { deviceId, messageType, payload } = message;
-        if (!deviceId || !messageType) {
-            socket.emit("web:receive:push_message", {
-                status: "error",
-                message: "Thiếu thông tin bắt buộc",
-            });
-            return;
-        }
-        // Save push message to database
-        const pushMessage = new PushMessage({
-            deviceId,
-            messageType,
-            payload,
-        });
-        const savedMessage = await pushMessage.save();
-        console.log("pushMessage", pushMessage);
-
-        socket.emit("web:receive:push_message", {
-            status: "success",
-            data: savedMessage.toObject(),
-        });
-
-        let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
-        if (deviceSocket) {
-            // Get all messages for this device
-            const messsages = await PushMessage.find({ 
-                deviceId: deviceId,
-                status: "pending",
-            })
-                .sort({ createdAt: -1 })
-                .lean();
-            // Get messages that unique by messageType and with createdAt desc
-            const uniqueMessages = messsages.reduce((acc, message) => {
-                if (!acc.some((msg) => msg.messageType === message.messageType)) {
-                    acc.push(message);
-                }
-                return acc;
-            }, []);
-
-            if (uniqueMessages.length > 0) {
-                console.log("socket-web-handler-uniqueMessages", uniqueMessages);
-                deviceSocket.emit("mobile:receive:push_messages", {
-                    webSocketId: socket.id,
-                    messages: uniqueMessages,
+    socket.on("web:send:push_message", async (message, callback) => {
+        try {
+            console.log("web:send:push_message", message);
+            const { deviceId, messageType, payload } = message;
+            if (!deviceId || !messageType) {
+                callback({
+                    status: "error",
+                    message: "Thiếu thông tin bắt buộc ( deviceId, messageType )",
                 });
+                return;
             }
+            // Save push message to database
+            const pushMessage = new PushMessage({
+                deviceId,
+                messageType,
+                payload,
+            });
+            const savedMessage = await pushMessage.save();
+
+            let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
+            if (deviceSocket) {
+                // Get all messages for this device
+                const messsages = await PushMessage.find({
+                    deviceId: deviceId,
+                    status: "pending",
+                })
+                    .sort({ createdAt: -1 })
+                    .lean();
+                // Get messages that unique by messageType and with createdAt desc
+                const uniqueMessages = messsages.reduce((acc, message) => {
+                    if (!acc.some((msg) => msg.messageType === message.messageType)) {
+                        acc.push(message);
+                    }
+                    return acc;
+                }, []);
+
+                if (uniqueMessages.length > 0) {
+                    console.log("socket-web-handler-uniqueMessages", uniqueMessages);
+                    deviceSocket.timeout(3000).emit("mobile:receive:push_messages", {
+                        webSocketId: socket.id,
+                        messages: uniqueMessages,
+                    }, async (err, response) => {
+                        if (err) {
+                            console.error("Error sending push messages:", err);
+                            callback({
+                                status: "error",
+                                message: "Lỗi khi gửi tin nhắn đẩy: " + err.message + ". Tin nhắn sẽ được gửi khi thiết bị kết nối lại",
+                            });
+                            return;
+                        }
+                        if (response && response.status === "success") {
+                            console.log("Push messages sent successfully:", response);
+                            // set messages status to sent
+                            try {
+                                let promises = uniqueMessages.map((message) => {
+                                    return PushMessage.findByIdAndUpdate(
+                                        message._id,
+                                        { status: "sent" },
+                                        { new: false }
+                                    );
+                                });
+                                await Promise.all(promises);
+                                callback({
+                                    status: "success",
+                                    message: "Tin nhắn đẩy đã được gửi thành công",
+                                    data: savedMessage.toObject(),
+                                });
+                            } catch (updateError) {
+                                console.error("Error updating push messages status:", updateError);
+                                callback({
+                                    status: "error",
+                                    message: "Tin nhắn đã được xử lý nhưng lỗi khi cập nhật trạng thái tin nhắn đẩy: " + updateError.message,
+                                });
+                            }
+                        } else {
+                            console.error("Error in push messages response:", response);
+                            callback({
+                                status: "error",
+                                message: response.message || "Lỗi khi gửi tin nhắn đẩy",
+                            });
+                        }
+                    });
+                } else {
+                    console.warn("No unique messages found for deviceId:", deviceId);
+                    callback({
+                        status: "warning",
+                        message: "Không có tin nhắn đẩy nào để gửi ( đây là bug )",
+                    })
+                }
+            } else {
+                console.warn("Device socket not found for deviceId:", deviceId);
+                callback({
+                    status: "warning",
+                    message: "Thiết bị không trực tuyến, tin nhắn sẽ được gửi khi thiết bị kết nối lại",
+                })
+            }
+        } catch (error) {
+            console.error("Error sending push message:", error);
+            callback({
+                status: "error",
+                message: "Lỗi khi gửi tin nhắn đẩy: " + error.message,
+            });
         }
     })
 
