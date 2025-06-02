@@ -59,22 +59,23 @@ const socketWebHandler = (io, socket) => {
     })
 
     // Push message handler
-    socket.on("web:send:get_push_messages", async () => {
+    socket.on("web:send:get_push_messages", async (data, callback) => {
         try {
             const pushMessages = await PushMessage.find()
                 // sort by createdAt desc
                 .sort({ createdAt: -1 })
                 .lean();
-            socket.emit("web:receive:get_push_messages", {
+            callback({
                 status: "success",
+                message: "Lấy tin nhắn đẩy thành công",
                 data: pushMessages,
-            });
+            })
         } catch (error) {
             console.error("Error fetching push messages:", error);
-            socket.emit("web:receive:get_push_messages", {
+            callback({
                 status: "error",
-                message: "Lỗi khi lấy tin nhắn đẩy",
-            });
+                message: "Lỗi khi lấy tin nhắn đẩy: " + error.message,
+            })
         }
     })
 
