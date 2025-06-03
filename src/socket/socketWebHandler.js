@@ -184,82 +184,133 @@ const socketWebHandler = (io, socket) => {
         }
     })
 
-    socket.on("web:send:reboot", async (data) => {
+    socket.on("web:send:reboot", async (data, callback) => {
         console.log("web:send:reboot", data);
-        const { deviceId } = data;
-        if (!deviceId) {
-            socket.emit("web:receive:system_command", {
-                error: "Thiếu thông tin bắt buộc",
-            });
-            return;
-        }
-        const device = await Device.findOne({ deviceId });
-        if (!device) {
-            socket.emit("web:receive:system_command", {
-                error: "Thiết bị không tồn tại",
-            });
-            return;
-        }
-        device.reboot = true;
-        device.rebootRequested = new Date();
-        device.rebootConfirmed = null;
-        await device.save();
+        try {
+            const { deviceId } = data;
+            if (!deviceId) {
+                callback({
+                    status: "error",
+                    message: "Thiếu thông tin bắt buộc ( deviceId )",
+                })
+                return;
+            }
+            const device = await Device.findOne({ deviceId });
+            if (!device) {
+                callback({
+                    status: "error",
+                    message: "Thiết bị không tồn tại",
+                });
+                return;
+            }
+            device.reboot = true;
+            device.rebootRequested = new Date();
+            device.rebootConfirmed = null;
+            await device.save();
 
-        socket.emit("web:receive:system_command", {
-            status: "success",
-            message: "Yêu cầu khởi động lại đã được gửi đến thiết bị",
-            device: device,
-        })
-
-        let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
-        if (deviceSocket) {
-            deviceSocket.emit("mobile:receive:push_messages", {
-                webSocketId: "", // dont need to send to web
-                messages: [
-                    {
-                        messageType: "configUpdated",
-                    },
-                ],
+            let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
+            if (deviceSocket) {
+                deviceSocket.timeout(3000).emit("mobile:receive:push_messages", {
+                    webSocketId: "", // dont need to send to web
+                    messages: [
+                        {
+                            messageType: "configUpdated",
+                        },
+                    ],
+                }, (err, response) => {
+                    if (err || response.status === "error") {
+                        callback({
+                            status: "success",
+                            message: "Thiết bị không phản hồi ( timeout ), yêu cầu khởi động lại sẽ được gửi khi thiết bị cập nhật cấu hình",
+                            device: device,
+                        });
+                        return;
+                    }
+                    console.log("Reboot request response:", response);
+                    callback({
+                        status: "success",
+                        message: "Yêu cầu khởi động lại đã được gửi đến thiết bị",
+                        device: device,
+                    });
+                });
+            } else {
+                callback({
+                    status: "success",
+                    message: "Thiết bị không trực tuyến, yêu cầu khởi động lại sẽ được gửi khi thiết bị cập nhật cấu hình",
+                    device: device,
+                })
+            }
+        } catch (error) {
+            console.error("Error sending reboot command:", error);
+            callback({
+                status: "error",
+                message: "Lỗi khi gửi yêu cầu khởi động lại: " + error.message,
             });
         }
     })
 
-    socket.on("web:send:factory_reset", async (data) => {
-        console.log("web:send:factory_reset", data);
-        const { deviceId } = data;
-        if (!deviceId) {
-            socket.emit("web:receive:system_command", {
-                error: "Thiếu thông tin bắt buộc",
-            });
-            return;
-        }
-        const device = await Device.findOne({ deviceId });
-        if (!device) {
-            socket.emit("web:receive:system_command", {
-                error: "Thiết bị không tồn tại",
-            });
-            return;
-        }
-        device.factoryReset = true;
-        device.factoryResetRequested = new Date();
-        device.factoryResetConfirmed = null;
-        await device.save();
+    socket.on("web:send:factory_reset", async (data, callback) => {
+        try {
+            console.log("web:send:factory_reset", data);
+            const { deviceId } = data;
+            if (!deviceId) {
+                callback({
+                    status: "error",
+                    message: "Thiếu thông tin bắt buộc ( deviceId )",
+                });
+                return;
+            }
+            const device = await Device.findOne({ deviceId });
+            if (!device) {
+                callback({
+                    status: "error",
+                    message: "Thiết bị không tồn tại",
+                });
+                return;
+            }
+            device.factoryReset = true;
+            device.factoryResetRequested = new Date();
+            device.factoryResetConfirmed = null;
+            await device.save();
 
-        socket.emit("web:receive:system_command", {
-            status: "success",
-            message: "Yêu cầu khôi phục cài đặt gốc đã được gửi đến thiết bị",
-            device: device,
-        })
-
-        let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
-        if (deviceSocket) {
-            deviceSocket.emit("mobile:receive:push_messages", {
-                webSocketId: "", // dont need to send to web
-                messages: [
-                    {
-                        messageType: "configUpdated",
-                    },
-                ],
+            let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
+            if (deviceSocket) {
+                deviceSocket.timeout(3000).emit("mobile:receive:push_messages", {
+                    webSocketId: "", // dont need to send to web
+                    messages: [
+                        {
+                            messageType: "configUpdated",
+                        },
+                    ],
+                }, (err, response) => {
+                    if (err || response.status === "error") {
+                        callback({
+                            status: "success",
+                            message: "Thiết bị không phản hồi ( timeout ), yêu cầu khôi phục cài đặt gốc sẽ được gửi khi thiết bị cập nhật cấu hình",
+                            device: device,
+                        });
+                        return;
+                    }
+                    console.log("Factory reset request response:", response);
+                    callback({
+                        status: "success",
+                        message: "Yêu cầu khôi phục cài đặt gốc đã được gửi đến thiết bị",
+                        device: device,
+                    });
+                });
+            } else {
+                console.warn("Device socket not found for deviceId:", deviceId);
+                callback({
+                    status: "success",
+                    message: "Thiết bị không trực tuyến, yêu cầu khôi phục cài đặt gốc sẽ được gửi khi thiết bị cập nhật cấu hình",
+                    device: device,
+                })
+            }
+        } catch (error) {
+            console.error("Error sending factory reset command:", error);
+            callback({
+                status: "error",
+                message: "Lỗi khi gửi yêu cầu khôi phục cài đặt gốc: " + error.message,
             });
         }
     })
@@ -285,99 +336,168 @@ const socketWebHandler = (io, socket) => {
         device.passwordReset = newPassword;
         await device.save();
 
-        callback({
-            status: "success",
-            message: "Mật khẩu thiết bị đã được cập nhật thành công",
-        });
-
         let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
         if (deviceSocket) {
-            deviceSocket.emit("mobile:receive:push_messages", {
+            deviceSocket.timeout(3000).emit("mobile:receive:push_messages", {
                 webSocketId: "", // dont need to send to web
                 messages: [
                     {
                         messageType: "configUpdated",
                     },
                 ],
+            }, (err, response) => {
+                if (err || response.status === "error") {
+                    callback({
+                        status: "success",
+                        message: "Thiết bị không phản hồi ( timeout ), yêu cầu cập nhật mật khẩu sẽ được gửi khi thiết bị cập nhật cấu hình",
+                        device: device,
+                    });
+                    return;
+                }
+                console.log("Change password request response:", response);
+                callback({
+                    status: "success",
+                    message: "Yêu cầu cập nhật mật khẩu đã được gửi đến thiết bị",
+                    device: device,
+                });
+            });
+        } else {
+            console.warn("Device socket not found for deviceId:", deviceId);
+            callback({
+                status: "success",
+                message: "Thiết bị không trực tuyến, yêu cầu cập nhật mật khẩu sẽ được gửi khi thiết bị cập nhật cấu hình",
+                device: device,
             });
         }
     })
 
     socket.on("web:send:lock_device", async (data, callback) => {
-        console.log("web:send:lock_device", data);
-        const { deviceId, lockMessage } = data;
-        if (!deviceId) {
-            callback({
-                status: "error",
-                message: "Thiếu thông tin bắt buộc ( deviceId )",
-            })
-            return;
-        }
-        const device = await Device.findOne({ deviceId });
-        if (!device) {
-            callback({
-                status: "error",
-                message: "Thiết bị không tồn tại",
-            });
-            return;
-        }
-        device.lock = true;
-        device.lockMessage = lockMessage || "Thiết bị đã bị khóa";
-        await device.save();
-        callback({
-            status: "success",
-            message: "Thiết bị đã được khóa thành công",
-            device: device,
-        });
+        try {
+            console.log("web:send:lock_device", data);
+            const { deviceId, lockMessage } = data;
+            if (!deviceId) {
+                callback({
+                    status: "error",
+                    message: "Thiếu thông tin bắt buộc ( deviceId )",
+                })
+                return;
+            }
+            const device = await Device.findOne({ deviceId });
+            if (!device) {
+                callback({
+                    status: "error",
+                    message: "Thiết bị không tồn tại",
+                });
+                return;
+            }
+            device.lock = true;
+            device.lockMessage = lockMessage || "Thiết bị đã bị khóa";
+            await device.save();
 
-        let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
-        if (deviceSocket) {
-            deviceSocket.emit("mobile:receive:push_messages", {
-                webSocketId: "", // dont need to send to web
-                messages: [
-                    {
-                        messageType: "configUpdated",
-                    },
-                ],
+            let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
+            if (deviceSocket) {
+                deviceSocket.timeout(3000).emit("mobile:receive:push_messages", {
+                    webSocketId: "", // dont need to send to web
+                    messages: [
+                        {
+                            messageType: "configUpdated",
+                        },
+                    ],
+                }, (err, response) => {
+                    if (err || response.status === "error") {
+                        console.error("Error sending lock command:", response.message);
+                        callback({
+                            status: "success",
+                            message: "Thiết bị không phản hồi ( timeout ), yêu cầu khóa sẽ được gửi khi thiết bị cập nhật cấu hình",
+                            device: device,
+                        });
+                        return;
+                    }
+                    console.log("Lock request response:", response);
+                    callback({
+                        status: "success",
+                        message: "Yêu cầu khóa đã được gửi đến thiết bị",
+                        device: device,
+                    });
+                });
+            } else {
+                console.warn("Device socket not found for deviceId:", deviceId);
+                callback({
+                    status: "success",
+                    message: "Thiết bị không trực tuyến, yêu cầu khóa sẽ được gửi khi thiết bị cập nhật cấu hình",
+                    device: device,
+                });
+            }
+        } catch (error) {
+            console.error("Error sending lock command:", error);
+            callback({
+                status: "error",
+                message: "Lỗi khi gửi yêu cầu khóa thiết bị: " + error.message,
             });
         }
     })
 
     socket.on("web:send:unlock_device", async (data, callback) => {
-        console.log("web:send:unlock_device", data);
-        const { deviceId } = data;
-        if (!deviceId) {
+        try {
+            console.log("web:send:unlock_device", data);
+            const { deviceId } = data;
+            if (!deviceId) {
+                callback({
+                    status: "error",
+                    message: "Thiếu thông tin bắt buộc ( deviceId )",
+                })
+                return;
+            }
+            const device = await Device.findOne({ deviceId });
+            if (!device) {
+                callback({
+                    status: "error",
+                    message: "Thiết bị không tồn tại",
+                });
+                return;
+            }
+            device.lock = false;
+            device.lockMessage = "";
+            await device.save();
+
+            let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
+            if (deviceSocket) {
+                deviceSocket.timeout(3000).emit("mobile:receive:push_messages", {
+                    webSocketId: "", // dont need to send to web
+                    messages: [
+                        {
+                            messageType: "configUpdated",
+                        },
+                    ],
+                }, (err, response) => {
+                    if (err || response.status === "error") {
+                        callback({
+                            status: "success",
+                            message: "Thiết bị không phản hồi ( timeout ), yêu cầu mở khóa sẽ được gửi khi thiết bị cập nhật cấu hình",
+                            device: device,
+                        });
+                        return;
+                    }
+                    console.log("Unlock request response:", response);
+                    callback({
+                        status: "success",
+                        message: "Yêu cầu mở khóa đã được gửi đến thiết bị",
+                        device: device,
+                    });
+                });
+            } else {
+                console.warn("Device socket not found for deviceId:", deviceId);
+                callback({
+                    status: "success",
+                    message: "Thiết bị không trực tuyến, yêu cầu mở khóa sẽ được gửi khi thiết bị cập nhật cấu hình",
+                    device: device,
+                })
+            }
+        } catch (error) {
+            console.error("Error sending unlock command:", error);
             callback({
                 status: "error",
-                message: "Thiếu thông tin bắt buộc ( deviceId )",
-            })
-            return;
-        }
-        const device = await Device.findOne({ deviceId });
-        if (!device) {
-            callback({
-                status: "error",
-                message: "Thiết bị không tồn tại",
-            });
-            return;
-        }
-        device.lock = false;
-        device.lockMessage = "";
-        await device.save();
-        callback({
-            status: "success",
-            message: "Thiết bị đã được mở khóa thành công",
-            device: device,
-        });
-        let deviceSocket = await getMobileSocketByDeviceId(io, deviceId);
-        if (deviceSocket) {
-            deviceSocket.emit("mobile:receive:push_messages", {
-                webSocketId: "", // dont need to send to web
-                messages: [
-                    {
-                        messageType: "configUpdated",
-                    },
-                ],
+                message: "Lỗi khi gửi yêu cầu mở khóa thiết bị: " + error.message,
             });
         }
     })
