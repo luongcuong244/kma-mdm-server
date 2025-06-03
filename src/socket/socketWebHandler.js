@@ -400,12 +400,32 @@ const socketWebHandler = (io, socket) => {
             });
             return;
         }
-        deviceSocket.emit("mobile:receive:request_remote_control", {
+        // we need to wait for the user confirmation ( max 10s )
+        deviceSocket.timeout(12000).emit("mobile:receive:request_remote_control", {
             webSocketId: socket.id,
-        });
-        callback({
-            status: "success",
-            message: "Yêu cầu điều khiển từ xa đã được gửi đến thiết bị",
+        }, (err, response) => {
+            if (err) {
+                console.error("Error requesting remote control:", err);
+                callback({
+                    status: "error",
+                    message: "Thiết bị không phản hồi ( timeout )",
+                });
+                return;
+            }
+            if (response && response.status === "success") {
+                console.log("Remote control request response:", response);
+                callback({
+                    status: "success",
+                    message: "Ứng dụng điều khiển từ xa đã được mở",
+                });
+            } else {
+                console.error("Error in remote control request response:", response);
+                callback({
+                    status: "error",
+                    message: response.message || "Lỗi khi gửi yêu cầu điều khiển từ xa",
+                });
+                return;
+            }
         });
     })
 }
