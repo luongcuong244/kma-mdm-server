@@ -1,5 +1,6 @@
 const Configuration = require("../../models/configuration.model");
 const Device = require("../../models/device.model");
+const AppIcon = require("../../models/app_icon.model");
 
 const { getSHA1String } = require("../../helper/crypto");
 
@@ -104,6 +105,12 @@ exports.getServerConfig = async (req, res) => {
         return res.status(400).json({
             message: "Device không tồn tại",
         });
+    }
+
+    for (const appSetting of device.configuration.applicationSettings) {
+        if (appSetting.application && appSetting.application.icon) {
+            appSetting.application.icon = await AppIcon.findById(appSetting.application.icon);
+        }
     }
 
     let deviceInfoObj = device.deviceInfo;
